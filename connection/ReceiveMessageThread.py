@@ -36,12 +36,12 @@ class ReceiveMessageThread(threading.Thread):
 	def receiveEncryptedMessages(self) -> list:
 		iv = self.receiveData(256)
 		message = self.receiveData(256)
-		dataLength = self.connectionHandler.encryptUtils.decryptReceivedMessage(iv, message)
+		dataLength = self.connectionHandler.encryptionUtils.decryptReceivedMessage(iv, message)
 		messageList = list()
 		for i in range(int.from_bytes(dataLength)):
 			iv = self.receiveData(256)
 			message = self.receiveData(256)
-			data = self.connectionHandler.encryptUtils.decryptReceivedMessage(iv, message)
+			data = self.connectionHandler.encryptionUtils.decryptReceivedMessage(iv, message)
 			messageList.append(data)
 		print(messageList)
 		return messageList

@@ -15,7 +15,7 @@ class ConnectionHandler:
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sendMessageUtils = SendMessageUtils(self)
 		self.connectedPlayerCount = 0
-		self.encryptUtils = EncryptionUtils(self)
+		self.encryptionUtils = EncryptionUtils(self)
 
 	def connectToServer(self, ip: str, port: int):
 		self.socket.connect((ip, port))
@@ -27,8 +27,8 @@ class ConnectionHandler:
 		print("key exchanged")
 
 	def keyExchanges(self):
-		self.encryptUtils.setupServerKey(self.receiveMessageThread.waitForKeyExchange())
-		self.sendMessageUtils.sendBytes(self.encryptUtils.keyPair.publickey().export_key())
+		self.encryptionUtils.setupServerKey(self.receiveMessageThread.waitForKeyExchange())
+		self.sendMessageUtils.sendBytes(self.encryptionUtils.keyPair.publickey().export_key())
 
 	def runWaitForPlayersThread(self):
 		thread = threading.Thread(target=self.waitForPlayersThread)
