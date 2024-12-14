@@ -13,6 +13,12 @@ class GuiHandler:
 		self.gameWindowHandler = GameWindowHandler(self)
 
 	def showConnectWindow(self):
-		self.connectWindowHandler.setupUi(self.mainWindow)
+		self.connectWindowHandler.setupUi()
+		self.mainWindow.show()
+		self.app.exec()
+		self.showGameWindow()
+
+	def showGameWindow(self):
+		self.gameWindowHandler.setupUi()
 		self.mainWindow.show()
 		self.app.exec()

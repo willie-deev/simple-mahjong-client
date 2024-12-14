@@ -12,6 +12,7 @@ class Main:
 		self.connectionHandler = ConnectionHandler(self)
 		self.guiHandler.showConnectWindow()
 
+
 if __name__ == '__main__':
 	main = Main()
 	main.main()
