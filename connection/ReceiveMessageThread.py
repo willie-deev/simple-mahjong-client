@@ -32,6 +32,8 @@ class ReceiveMessageThread(threading.Thread):
 				playerCount = int.from_bytes(self.receiveEncryptedMessages()[0])
 				self.receivedPlayerCount = playerCount
 				self.receivedPlayerCountEvent.set()
+			while self.connectionHandler.connectionState == ConnectionStates.STARTING:
+				receivedData = self.receiveEncryptedMessages()
 
 	def receiveEncryptedMessages(self) -> list:
 		iv = self.receiveData(256)
