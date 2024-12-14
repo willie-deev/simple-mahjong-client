@@ -19,6 +19,7 @@ class ConnectWindowHandler(QMainWindow):
 			self.guiHandler.main.connectionHandler.connectToServer(self.ui.ip.text(), int(self.ui.port.text()))
 		except Exception as e:
 			self.ui.debugOutput.setText("Debug Output:\n" + str(e))
+			print(e)
 		else:
 			self.ui.ip.deleteLater()
 			self.ui.port.deleteLater()

@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QApplication, QMainWindow
 
+from connection.ConnectionHandler import ConnectionStates
 from gui.connectWindow.ConnectWindowHandler import ConnectWindowHandler
 from gui.gameWindow.GameWindowHandler import GameWindowHandler
 
@@ -16,7 +17,8 @@ class GuiHandler:
 		self.connectWindowHandler.setupUi()
 		self.mainWindow.show()
 		self.app.exec()
-		self.showGameWindow()
+		if self.main.connectionHandler.connectionState == ConnectionStates.STARTING:
+			self.showGameWindow()
 
 	def showGameWindow(self):
 		self.gameWindowHandler.setupUi()

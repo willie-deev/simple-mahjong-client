@@ -2,8 +2,9 @@ import socket
 import threading
 from enum import Enum
 
+from connection.EncryptionUtils import EncryptionUtils
 from connection.ReceiveMessageThread import ReceiveMessageThread
-from connection.SendMessageUtils import ConnectionUtils
+from connection.SendMessageUtils import SendMessageUtils
 
 
 class ConnectionHandler:
@@ -12,14 +13,22 @@ class ConnectionHandler:
 		self.receiveMessageThread = None
 		self.main = main
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.connectionUtils = ConnectionUtils(self)
+		self.sendMessageUtils = SendMessageUtils(self)
 		self.connectedPlayerCount = 0
+		self.encryptUtils = EncryptionUtils(self)
 
 	def connectToServer(self, ip: str, port: int):
 		self.socket.connect((ip, port))
 		self.connectionState = ConnectionStates.CONNECTED
 		self.receiveMessageThread = ReceiveMessageThread(self)
 		self.receiveMessageThread.start()
+		self.keyExchanges()
+		self.sendMessageUtils.sendAesKey()
+		print("key exchanged")
+
+	def keyExchanges(self):
+		self.encryptUtils.setupServerKey(self.receiveMessageThread.waitForKeyExchange())
+		self.sendMessageUtils.sendBytes(self.encryptUtils.keyPair.publickey().export_key())
 
 	def runWaitForPlayersThread(self):
 		thread = threading.Thread(target=self.waitForPlayersThread)
@@ -34,11 +43,13 @@ class ConnectionHandler:
 			self.connectedPlayerCount = self.receiveMessageThread.waitForPlayerCount()
 		self.main.guiHandler.connectWindowHandler.connectWindowController.triggerUpdatePlayerCount(
 			"Connected\nWaiting for other players...\nConnected player count: 4 / 4")
+		self.connectionState = ConnectionStates.STARTING
 		self.main.guiHandler.app.exit()
 
 
 class ConnectionStates(Enum):
-	NOT_CONNECTED = '0'
-	CONNECTED = '1'
-	STARTING = '2'
-	STARTED = '3'
+	NOT_CONNECTED = 0
+	CONNECTED = 1
+	KEY_EXCHANGED = 2
+	STARTING = 3
+	STARTED = 4
