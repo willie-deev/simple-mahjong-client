@@ -37,22 +37,24 @@ class GameWindowHandler(QMainWindow):
 		for cardType in cardTypes:
 			if "CHARACTER" in cardType.name:
 				number = cardType.name.split("_")[1]
-				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/character/{number}.png")
+				path = f"assets/character/{number}.png"
 			elif "DOT" in cardType.name:
 				number = cardType.name.split("_")[1]
-				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/dot/{number}.png")
+				path = f"assets/dot/{number}.png"
 			elif "BAMBOO" in cardType.name:
 				number = cardType.name.split("_")[1]
-				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/bamboo/{number}.png")
+				path = f"assets/bamboo/{number}.png"
 			elif "WIND" in cardType.name:
 				wind = cardType.name.split("_")[0].lower()
-				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/wind/{wind}.png")
+				path = f"assets/wind/{wind}.png"
 			elif "DRAGON" in cardType.name:
 				dragon = cardType.name.split("_")[0].lower()
-				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/dragon/{dragon}.png")
+				path = f"assets/dragon/{dragon}.png"
 			else:
-				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/flower/flower.png")
-
+				path = f"assets/flower/flower.png"
+			pixmap = QPixmap(path)
+			scaled_pixmap = pixmap.scaled(60, 80)
+			icon = QIcon(scaled_pixmap)
 			newPushButton = QPushButton("")
 			# newPushButton.setObjectName(u"2")
 			sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -69,12 +71,12 @@ class GameWindowHandler(QMainWindow):
 			font.setStrikeOut(False)
 			font.setKerning(True)
 			newPushButton.setFont(font)
-			newPushButton.setStyleSheet("padding: 0;")
+			newPushButton.setStyleSheet(f"padding: 0px;")
 			newPushButton.setCheckable(False)
 			newPushButton.setFlat(False)
 
 			newPushButton.setIcon(icon)
-			newPushButton.setIconSize(QSize(100, 100))
+			newPushButton.setIconSize(QSize(60, 80))
 			self.ui.selfCards.layout().insertWidget(1, newPushButton)
 			self.addedCards.append(newPushButton)
 
