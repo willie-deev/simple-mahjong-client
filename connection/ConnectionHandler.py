@@ -17,14 +17,19 @@ class ConnectionHandler:
 		self.connectedPlayerCount = 0
 		self.encryptionUtils = EncryptionUtils(self)
 
+	def setConnectionState(self, connectionState):
+		self.connectionState = connectionState
+		print(connectionState.name)
+
 	def connectToServer(self, ip: str, port: int):
 		self.socket.connect((ip, port))
-		self.connectionState = ConnectionStates.CONNECTED
 		self.receiveMessageThread = ReceiveMessageThread(self)
+		self.setConnectionState(ConnectionStates.CONNECTED)
 		self.receiveMessageThread.start()
 		self.keyExchanges()
 		self.sendMessageUtils.sendAesKey()
 		print("key exchanged")
+		self.setConnectionState(ConnectionStates.KEY_EXCHANGED)
 
 	def keyExchanges(self):
 		self.encryptionUtils.setupServerKey(self.receiveMessageThread.waitForKeyExchange())
@@ -43,7 +48,7 @@ class ConnectionHandler:
 			self.connectedPlayerCount = self.receiveMessageThread.waitForPlayerCount()
 		self.main.guiHandler.connectWindowHandler.connectWindowController.triggerUpdatePlayerCount(
 			"Connected\nWaiting for other players...\nConnected player count: 4 / 4")
-		self.connectionState = ConnectionStates.STARTING
+		self.setConnectionState(ConnectionStates.STARTING)
 		self.main.guiHandler.app.exit()
 
 

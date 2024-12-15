@@ -142,19 +142,19 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.label = QLabel(self.centralwidget)
-        self.label.setObjectName(u"label")
-        self.label.setAlignment(Qt.AlignCenter)
+        self.leftWind = QLabel(self.centralwidget)
+        self.leftWind.setObjectName(u"leftWind")
+        self.leftWind.setAlignment(Qt.AlignCenter)
 
-        self.horizontalLayout.addWidget(self.label)
+        self.horizontalLayout.addWidget(self.leftWind)
 
         self.verticalLayout_5 = QVBoxLayout()
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.label_6 = QLabel(self.centralwidget)
-        self.label_6.setObjectName(u"label_6")
-        self.label_6.setAlignment(Qt.AlignCenter)
+        self.opposideWind = QLabel(self.centralwidget)
+        self.opposideWind.setObjectName(u"opposideWind")
+        self.opposideWind.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout_5.addWidget(self.label_6)
+        self.verticalLayout_5.addWidget(self.opposideWind)
 
         self.label_8 = QLabel(self.centralwidget)
         self.label_8.setObjectName(u"label_8")
@@ -162,20 +162,20 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_5.addWidget(self.label_8)
 
-        self.label_7 = QLabel(self.centralwidget)
-        self.label_7.setObjectName(u"label_7")
-        self.label_7.setAlignment(Qt.AlignCenter)
+        self.selfWind = QLabel(self.centralwidget)
+        self.selfWind.setObjectName(u"selfWind")
+        self.selfWind.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout_5.addWidget(self.label_7)
+        self.verticalLayout_5.addWidget(self.selfWind)
 
 
         self.horizontalLayout.addLayout(self.verticalLayout_5)
 
-        self.label_5 = QLabel(self.centralwidget)
-        self.label_5.setObjectName(u"label_5")
-        self.label_5.setAlignment(Qt.AlignCenter)
+        self.rightWind = QLabel(self.centralwidget)
+        self.rightWind.setObjectName(u"rightWind")
+        self.rightWind.setAlignment(Qt.AlignCenter)
 
-        self.horizontalLayout.addWidget(self.label_5)
+        self.horizontalLayout.addWidget(self.rightWind)
 
         self.horizontalLayout.setStretch(0, 1)
         self.horizontalLayout.setStretch(1, 4)
@@ -257,11 +257,11 @@ class Ui_MainWindow(object):
         self.pushButton.setText("")
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.leftWind.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.opposideWind.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_7.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.selfWind.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.rightWind.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
     # retranslateUi
 

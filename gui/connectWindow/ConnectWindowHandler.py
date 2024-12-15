@@ -13,6 +13,8 @@ class ConnectWindowHandler(QMainWindow):
 		self.ui.setupUi(self.guiHandler.mainWindow)
 		self.ui.connectToServer.clicked.connect(self.clicked)
 		self.connectWindowController.updatePlayerCount.connect(self.ui.debugOutput.setText)
+		if self.guiHandler.main.debug:
+			self.clicked()
 
 	def clicked(self):
 		try:

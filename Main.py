@@ -1,15 +1,16 @@
 from connection.ConnectionHandler import ConnectionHandler
+from game.GameHandler import GameHandler
 from gui.GuiHandler import GuiHandler
 
 
 class Main:
 	def __init__(self):
-		self.guiHandler = None
-		self.connectionHandler = None
-
-	def main(self):
+		self.debug = True
+		self.gameHandler = GameHandler(self)
 		self.guiHandler = GuiHandler(self)
 		self.connectionHandler = ConnectionHandler(self)
+
+	def main(self):
 		self.guiHandler.showConnectWindow()
 
 

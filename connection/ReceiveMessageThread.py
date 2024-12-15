@@ -1,5 +1,8 @@
 import threading
 
+from game.GameStates import GameStates
+from game.Winds import Winds
+
 
 class ReceiveMessageThread(threading.Thread):
 	def __init__(self, connectionHandler):
@@ -23,17 +26,36 @@ class ReceiveMessageThread(threading.Thread):
 
 	def run(self):
 		from connection.ConnectionHandler import ConnectionStates
+		if self.connectionHandler.connectionState == ConnectionStates.CONNECTED:
+			self.receivedKey = self.receiveData(450)
+			self.receivedKeyExchangeEvent.set()
 		while True:
-			if self.connectionHandler.connectionState == ConnectionStates.CONNECTED:
-				self.receivedKey = self.receiveData(450)
-				self.receivedKeyExchangeEvent.set()
-				self.connectionHandler.connectionState = ConnectionStates.KEY_EXCHANGED
-			while self.connectionHandler.connectionState == ConnectionStates.KEY_EXCHANGED:
-				playerCount = int.from_bytes(self.receiveEncryptedMessages()[0])
+			receivedData: list[bytes] = self.receiveEncryptedMessages()
+			if self.connectionHandler.connectionState == ConnectionStates.KEY_EXCHANGED:
+				playerCount = int.from_bytes(receivedData[0])
 				self.receivedPlayerCount = playerCount
 				self.receivedPlayerCountEvent.set()
-			while self.connectionHandler.connectionState == ConnectionStates.STARTING:
-				receivedData = self.receiveEncryptedMessages()
+			gameManager = self.connectionHandler.main.gameHandler.gameManager
+			gameManager.setGameState(GameStates.STARTED)
+			gameWindowController = self.connectionHandler.main.guiHandler.gameWindowHandler.gameWindowController
+			if self.connectionHandler.connectionState == ConnectionStates.STARTING:
+				match gameManager.getGameState():
+					case GameStates.STARTED:
+						selfWindOrder = int.from_bytes(receivedData[0])
+						print(selfWindOrder)
+						gameWindowController.triggerSetPlayerWind(selfWindOrder)
+						match selfWindOrder:
+							case 0:
+								gameManager.setSelfWind(Winds.EAST)
+							case 1:
+								gameManager.setSelfWind(Winds.SOUTH)
+							case 2:
+								gameManager.setSelfWind(Winds.WEST)
+							case 3:
+								gameManager.setSelfWind(Winds.NORTH)
+						gameManager.setGameState(GameStates.CHANGED_WIND)
+					case GameStates.CHANGED_WIND:
+						pass
 
 	def receiveEncryptedMessages(self) -> list:
 		iv = self.receiveData(256)
