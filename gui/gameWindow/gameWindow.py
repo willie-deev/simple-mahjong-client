@@ -16,8 +16,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel,
-    QLayout, QMainWindow, QPushButton, QSizePolicy,
-    QSpacerItem, QVBoxLayout, QWidget)
+    QLayout, QMainWindow, QSizePolicy, QSpacerItem,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -46,28 +46,6 @@ class Ui_MainWindow(object):
         self.horizontalSpacer_3 = QSpacerItem(0, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer_3)
-
-        self.pushButton = QPushButton(self.selfCards)
-        self.pushButton.setObjectName(u"pushButton")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.pushButton.sizePolicy().hasHeightForWidth())
-        self.pushButton.setSizePolicy(sizePolicy1)
-        self.pushButton.setMinimumSize(QSize(1, 1))
-        self.pushButton.setMaximumSize(QSize(70, 100))
-        self.pushButton.setBaseSize(QSize(0, 0))
-        font = QFont()
-        font.setPointSize(12)
-        font.setBold(False)
-        font.setStrikeOut(False)
-        font.setKerning(True)
-        self.pushButton.setFont(font)
-        self.pushButton.setStyleSheet(u"")
-        self.pushButton.setCheckable(False)
-        self.pushButton.setFlat(False)
-
-        self.horizontalLayout_3.addWidget(self.pushButton)
 
         self.horizontalSpacer_4 = QSpacerItem(0, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
@@ -254,7 +232,6 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.pushButton.setText("")
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.leftWind.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))

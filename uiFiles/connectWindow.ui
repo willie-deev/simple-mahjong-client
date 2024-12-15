@@ -78,7 +78,7 @@
                                         </font>
                                     </property>
                                     <property name="text">
-                                        <string>127.0.0.1</string>
+                                        <string/>
                                     </property>
                                     <property name="alignment">
                                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -93,7 +93,7 @@
                                         </font>
                                     </property>
                                     <property name="text">
-                                        <string>12345</string>
+                                        <string/>
                                     </property>
                                     <property name="alignment">
                                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

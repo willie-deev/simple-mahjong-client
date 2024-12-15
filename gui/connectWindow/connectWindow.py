@@ -124,8 +124,8 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"ip/port:", None))
-        self.ip.setText(QCoreApplication.translate("MainWindow", u"127.0.0.1", None))
-        self.port.setText(QCoreApplication.translate("MainWindow", u"12345", None))
+        self.ip.setText("")
+        self.port.setText("")
         self.connectToServer.setText(QCoreApplication.translate("MainWindow", u"Connect to server", None))
     # retranslateUi
 

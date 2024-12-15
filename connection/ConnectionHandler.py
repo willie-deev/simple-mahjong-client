@@ -5,6 +5,7 @@ from enum import Enum
 from connection.EncryptionUtils import EncryptionUtils
 from connection.ReceiveMessageThread import ReceiveMessageThread
 from connection.SendMessageUtils import SendMessageUtils
+from utils.debugUtils import debugOutput
 
 
 class ConnectionHandler:
@@ -19,7 +20,7 @@ class ConnectionHandler:
 
 	def setConnectionState(self, connectionState):
 		self.connectionState = connectionState
-		print(connectionState.name)
+		debugOutput(connectionState.name)
 
 	def connectToServer(self, ip: str, port: int):
 		self.socket.connect((ip, port))
@@ -28,7 +29,7 @@ class ConnectionHandler:
 		self.receiveMessageThread.start()
 		self.keyExchanges()
 		self.sendMessageUtils.sendAesKey()
-		print("key exchanged")
+		debugOutput("key exchanged")
 		self.setConnectionState(ConnectionStates.KEY_EXCHANGED)
 
 	def keyExchanges(self):

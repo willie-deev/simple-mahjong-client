@@ -1,5 +1,10 @@
+from PySide6.QtWidgets import QPushButton
+
+from game.CardType import CardType
+from game.Winds import Winds
 from gui.gameWindow.GameWindowController import GameWindowController
 from gui.gameWindow.gameWindow import *
+from utils.debugUtils import debugOutput
 
 
 class GameWindowHandler(QMainWindow):
@@ -8,22 +13,48 @@ class GameWindowHandler(QMainWindow):
 		self.ui = Ui_MainWindow()
 		self.guiHandler = guiHandler
 		self.gameWindowController = GameWindowController(self)
+		self.addedCards = list[QPushButton]()
 
 	def setupUi(self):
 		self.ui.setupUi(self.guiHandler.mainWindow)
 		icon = QIcon("/home/willie/PycharmProjects/simple-mahjong-client/assets/character/1.png")
-		print(icon.isNull())
-		# self.ui.pushButton.setStyleSheet("background-image : url(assets/character/1.png);")
-		self.ui.pushButton.setText("")
-		self.ui.pushButton.setStyleSheet("padding: 0;")
-		self.ui.pushButton.setIcon(icon)
-		print(str(self.ui.pushButton.size().width()) + " " + str(self.ui.pushButton.size().height()))
-		self.ui.pushButton.setIconSize(QSize(100, 100))
-		self.ui.pushButton.update()
+		debugOutput(icon.isNull())
 
-		for i in range(16):
+		self.ui.selfCards.update()
+		self.gameWindowController.setPlayerWind.connect(self.setPlayerWind)
+		self.gameWindowController.addCards.connect(self.gotCards)
+		self.gameWindowController.setAllCards.connect(self.setAllCards)
+		debugOutput("inited")
+
+	def setAllCards(self, cardTypes: list[CardType]):
+		for addedCard in self.addedCards:
+			# self.ui.selfCards.layout().removeWidget(addedCard)
+			addedCard.deleteLater()
+		self.addedCards.clear()
+		self.gotCards(cardTypes)
+
+	def gotCards(self, cardTypes: list[CardType]):
+		for cardType in cardTypes:
+			if "CHARACTER" in cardType.name:
+				number = cardType.name.split("_")[1]
+				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/character/{number}.png")
+			elif "DOT" in cardType.name:
+				number = cardType.name.split("_")[1]
+				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/dot/{number}.png")
+			elif "BAMBOO" in cardType.name:
+				number = cardType.name.split("_")[1]
+				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/bamboo/{number}.png")
+			elif "WIND" in cardType.name:
+				wind = cardType.name.split("_")[0].lower()
+				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/wind/{wind}.png")
+			elif "DRAGON" in cardType.name:
+				dragon = cardType.name.split("_")[0].lower()
+				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/dragon/{dragon}.png")
+			else:
+				icon = QIcon(f"/home/willie/PycharmProjects/simple-mahjong-client/assets/flower/flower.png")
+
 			newPushButton = QPushButton("")
-			newPushButton.setObjectName(u"2")
+			# newPushButton.setObjectName(u"2")
 			sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 			sizePolicy1.setHorizontalStretch(0)
 			sizePolicy1.setVerticalStretch(0)
@@ -45,34 +76,30 @@ class GameWindowHandler(QMainWindow):
 			newPushButton.setIcon(icon)
 			newPushButton.setIconSize(QSize(100, 100))
 			self.ui.selfCards.layout().insertWidget(1, newPushButton)
-		self.ui.selfCards.update()
-		self.gameWindowController.setPlayerWind.connect(self.setPlayerWind)
-		print("inited")
+			self.addedCards.append(newPushButton)
 
-	# self.setPlayerWind(1)
-
-	def setPlayerWind(self, windOrder: int):
+	def setPlayerWind(self, wind: Winds):
 		eastPixmap = QPixmap("assets/wind/east.png")
 		southPixmap = QPixmap("assets/wind/south.png")
 		westPixmap = QPixmap("assets/wind/west.png")
 		northPixmap = QPixmap("assets/wind/north.png")
-		match windOrder:
-			case 0:
+		match wind:
+			case Winds.EAST:
 				self.ui.selfWind.setPixmap(eastPixmap)
 				self.ui.leftWind.setPixmap(southPixmap)
 				self.ui.opposideWind.setPixmap(westPixmap)
 				self.ui.rightWind.setPixmap(northPixmap)
-			case 1:
+			case Winds.SOUTH:
 				self.ui.selfWind.setPixmap(southPixmap)
 				self.ui.leftWind.setPixmap(westPixmap)
 				self.ui.opposideWind.setPixmap(northPixmap)
 				self.ui.rightWind.setPixmap(eastPixmap)
-			case 2:
+			case Winds.WEST:
 				self.ui.selfWind.setPixmap(westPixmap)
 				self.ui.leftWind.setPixmap(northPixmap)
 				self.ui.opposideWind.setPixmap(eastPixmap)
 				self.ui.rightWind.setPixmap(southPixmap)
-			case 3:
+			case Winds.NORTH:
 				self.ui.selfWind.setPixmap(northPixmap)
 				self.ui.leftWind.setPixmap(eastPixmap)
 				self.ui.opposideWind.setPixmap(southPixmap)

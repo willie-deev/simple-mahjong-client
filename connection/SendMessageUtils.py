@@ -1,3 +1,6 @@
+from utils.debugUtils import debugOutput
+
+
 class SendMessageUtils:
 	def __init__(self, connectionHandler):
 		self.connectionHandler = connectionHandler
@@ -7,7 +10,7 @@ class SendMessageUtils:
 		self.socket.sendall(message)
 
 	def sendAesKey(self):
-		print(len(self.connectionHandler.encryptionUtils.encryptAesKey()))
+		debugOutput(len(self.connectionHandler.encryptionUtils.encryptAesKey()))
 		self.socket.sendall(self.connectionHandler.encryptionUtils.encryptAesKey())
 
 	def sendEncryptBytes(self, message: bytes):

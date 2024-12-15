@@ -2,6 +2,8 @@ from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 
+from utils.debugUtils import debugOutput
+
 
 class EncryptionUtils:
 	def __init__(self, connectionHandler):
@@ -17,7 +19,7 @@ class EncryptionUtils:
 			self.serverPublicKey = RSA.importKey(serverPublicKey)
 			self.sendMessageRsaEncrypter = PKCS1_OAEP.new(self.serverPublicKey)
 		except Exception as e:
-			print(e)
+			debugOutput(e)
 
 	def encryptAesKey(self):
 		return self.sendMessageRsaEncrypter.encrypt(self.aesKey)

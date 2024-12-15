@@ -1,7 +1,8 @@
 import threading
 
+from game.CardType import CardType
 from game.GameStates import GameStates
-from game.Winds import Winds
+from utils.debugUtils import debugOutput
 
 
 class ReceiveMessageThread(threading.Thread):
@@ -31,33 +32,34 @@ class ReceiveMessageThread(threading.Thread):
 			self.receivedKeyExchangeEvent.set()
 		while True:
 			receivedData: list[bytes] = self.receiveEncryptedMessages()
+
 			if self.connectionHandler.connectionState == ConnectionStates.KEY_EXCHANGED:
 				playerCount = int.from_bytes(receivedData[0])
 				self.receivedPlayerCount = playerCount
 				self.receivedPlayerCountEvent.set()
-			gameManager = self.connectionHandler.main.gameHandler.gameManager
-			gameManager.setGameState(GameStates.STARTED)
-			gameWindowController = self.connectionHandler.main.guiHandler.gameWindowHandler.gameWindowController
+				self.connectionHandler.main.gameHandler.gameManager.setGameState(GameStates.CHANGING_WIND)
 			if self.connectionHandler.connectionState == ConnectionStates.STARTING:
-				match gameManager.getGameState():
-					case GameStates.STARTED:
-						selfWindOrder = int.from_bytes(receivedData[0])
-						print(selfWindOrder)
-						gameWindowController.triggerSetPlayerWind(selfWindOrder)
-						match selfWindOrder:
-							case 0:
-								gameManager.setSelfWind(Winds.EAST)
-							case 1:
-								gameManager.setSelfWind(Winds.SOUTH)
-							case 2:
-								gameManager.setSelfWind(Winds.WEST)
-							case 3:
-								gameManager.setSelfWind(Winds.NORTH)
-						gameManager.setGameState(GameStates.CHANGED_WIND)
-					case GameStates.CHANGED_WIND:
-						pass
+				self.handleStartingGame(receivedData)
 
-	def receiveEncryptedMessages(self) -> list:
+	def handleStartingGame(self, receivedData: list[bytes]):
+		gameManager = self.connectionHandler.main.gameHandler.gameManager
+		gameWindowController = self.connectionHandler.main.guiHandler.gameWindowHandler.gameWindowController
+		match gameManager.getGameState():
+			case GameStates.CHANGING_WIND:
+				selfWind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
+				gameWindowController.triggerSetPlayerWind(selfWind)
+				gameManager.setSelfWind(selfWind)
+				gameManager.setGameState(GameStates.GETTING_CARDS)
+			case GameStates.GETTING_CARDS:
+				cardsStrs = receivedData
+				cards = list[CardType]()
+				for cardStr in cardsStrs:
+					cards.append(gameManager.gameHandler.getCardTypeByName(cardStr.decode()))
+				gameManager.addCards(cards)
+			case GameStates.STARTED:
+				gameManager.sortAllCards()
+
+	def receiveEncryptedMessages(self) -> list[bytes]:
 		iv = self.receiveData(256)
 		message = self.receiveData(256)
 		dataLength = self.connectionHandler.encryptionUtils.decryptReceivedMessage(iv, message)
@@ -67,7 +69,7 @@ class ReceiveMessageThread(threading.Thread):
 			message = self.receiveData(256)
 			data = self.connectionHandler.encryptionUtils.decryptReceivedMessage(iv, message)
 			messageList.append(data)
-		print(messageList)
+		debugOutput(messageList)
 		return messageList
 
 	def receiveData(self, receiveByteCount: int):
@@ -75,11 +77,11 @@ class ReceiveMessageThread(threading.Thread):
 			receivedData = self.socket.recv(receiveByteCount)
 			while len(receivedData) < receiveByteCount:
 				if not receivedData:
-					print('server disconnected')
+					debugOutput('server disconnected')
 					self.socket.close()
 					return
 				receivedData += self.socket.recv(receiveByteCount - len(receivedData))
 			return receivedData
 		except Exception as e:
 			self.socket.close()
-			print(e)
+			debugOutput(e)
