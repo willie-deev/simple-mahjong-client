@@ -24,7 +24,40 @@ class GameWindowHandler(QMainWindow):
 		self.gameWindowController.setPlayerWind.connect(self.setPlayerWind)
 		self.gameWindowController.addCards.connect(self.gotCards)
 		self.gameWindowController.setAllCards.connect(self.setAllCards)
+
+		flowerPixmap = QPixmap("assets/flower/flower.png").scaledToHeight(48)
+		self.ui.selfFlowerIcon.setPixmap(flowerPixmap)
+		self.ui.leftFlowerIcon.setPixmap(self.rotatePixmap(flowerPixmap, 90))
+		self.ui.oppositeFlowerIcon.setPixmap(self.rotatePixmap(flowerPixmap, 180))
+		self.ui.rightFlowerIcon.setPixmap(self.rotatePixmap(flowerPixmap, 270))
+
+		self.setRotatedText(self.ui.selfFlowerCount, "0", 0)
+		self.setRotatedText(self.ui.leftFlowerCount, "0", 90)
+		self.setRotatedText(self.ui.oppositeFlowerCount, "0", 180)
+		self.setRotatedText(self.ui.rightFlowerCount, "0", 270)
 		debugOutput("inited")
+
+	def setRotatedText(self, widget: QLabel, text: str, degree: int):
+		if degree == 90 or degree == 270:
+			width = widget.size().height()
+			height = widget.size().width()
+			height = height // 2
+		else:
+			width = widget.size().width()
+			height = widget.size().height()
+			width = width // 2
+		pixmap = QPixmap(width, height)
+		pixmap.fill(Qt.GlobalColor.transparent)
+		painter = QPainter(pixmap)
+		painter.translate(pixmap.rect().center())
+		painter.rotate(degree)
+		font = QFont()
+		font.setPointSize(24)  # Set desired font size
+		painter.setFont(font)
+		painter.drawText(-width // 2, -height // 2, width, height, Qt.AlignmentFlag.AlignCenter, text)
+		painter.end()
+		widget.setPixmap(pixmap)
+		widget.update()
 
 	def setAllCards(self, cardTypes: list[CardType]):
 		for addedCard in self.addedCards:
@@ -57,13 +90,14 @@ class GameWindowHandler(QMainWindow):
 			icon = QIcon(scaled_pixmap)
 			newPushButton = QPushButton("")
 			# newPushButton.setObjectName(u"2")
-			sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+			sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 			sizePolicy1.setHorizontalStretch(0)
 			sizePolicy1.setVerticalStretch(0)
 			sizePolicy1.setHeightForWidth(newPushButton.sizePolicy().hasHeightForWidth())
 			newPushButton.setSizePolicy(sizePolicy1)
 			newPushButton.setMinimumSize(QSize(1, 1))
-			newPushButton.setMaximumSize(QSize(70, 100))
+			newPushButton.setMaximumSize(QSize(16777215, 100))
+			# newPushButton.setMaximumSize(QSize(70, 100))
 			newPushButton.setBaseSize(QSize(0, 0))
 			font = QFont()
 			font.setPointSize(12)
@@ -88,21 +122,25 @@ class GameWindowHandler(QMainWindow):
 		match wind:
 			case Winds.EAST:
 				self.ui.selfWind.setPixmap(eastPixmap)
-				self.ui.leftWind.setPixmap(southPixmap)
-				self.ui.opposideWind.setPixmap(westPixmap)
-				self.ui.rightWind.setPixmap(northPixmap)
+				self.ui.leftWind.setPixmap(self.rotatePixmap(southPixmap, 90))
+				self.ui.opposideWind.setPixmap(self.rotatePixmap(westPixmap, 180))
+				self.ui.rightWind.setPixmap(self.rotatePixmap(northPixmap, 270))
 			case Winds.SOUTH:
 				self.ui.selfWind.setPixmap(southPixmap)
-				self.ui.leftWind.setPixmap(westPixmap)
-				self.ui.opposideWind.setPixmap(northPixmap)
-				self.ui.rightWind.setPixmap(eastPixmap)
+				self.ui.leftWind.setPixmap(self.rotatePixmap(westPixmap, 90))
+				self.ui.opposideWind.setPixmap(self.rotatePixmap(northPixmap, 180))
+				self.ui.rightWind.setPixmap(self.rotatePixmap(eastPixmap, 270))
 			case Winds.WEST:
 				self.ui.selfWind.setPixmap(westPixmap)
-				self.ui.leftWind.setPixmap(northPixmap)
-				self.ui.opposideWind.setPixmap(eastPixmap)
-				self.ui.rightWind.setPixmap(southPixmap)
+				self.ui.leftWind.setPixmap(self.rotatePixmap(northPixmap, 90))
+				self.ui.opposideWind.setPixmap(self.rotatePixmap(eastPixmap, 180))
+				self.ui.rightWind.setPixmap(self.rotatePixmap(southPixmap, 270))
 			case Winds.NORTH:
 				self.ui.selfWind.setPixmap(northPixmap)
-				self.ui.leftWind.setPixmap(eastPixmap)
-				self.ui.opposideWind.setPixmap(southPixmap)
-				self.ui.rightWind.setPixmap(westPixmap)
+				self.ui.leftWind.setPixmap(self.rotatePixmap(eastPixmap, 90))
+				self.ui.opposideWind.setPixmap(self.rotatePixmap(southPixmap, 180))
+				self.ui.rightWind.setPixmap(self.rotatePixmap(westPixmap, 270))
+
+	def rotatePixmap(self, pixmap: QPixmap, degree: int):
+		transform = QTransform().rotate(degree)
+		return pixmap.transformed(transform)

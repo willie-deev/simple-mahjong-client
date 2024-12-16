@@ -37,7 +37,6 @@ class ReceiveMessageThread(threading.Thread):
 				playerCount = int.from_bytes(receivedData[0])
 				self.receivedPlayerCount = playerCount
 				self.receivedPlayerCountEvent.set()
-				self.connectionHandler.main.gameHandler.gameManager.setGameState(GameStates.CHANGING_WIND)
 			if self.connectionHandler.connectionState == ConnectionStates.STARTING:
 				self.handleStartingGame(receivedData)
 
