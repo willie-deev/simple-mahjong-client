@@ -1,7 +1,7 @@
 import threading
 
 from game.CardType import CardType
-from game.GameStates import GameStates
+from game.ServerActionType import ServerActionType
 from utils.debugUtils import debugOutput
 
 
@@ -41,22 +41,29 @@ class ReceiveMessageThread(threading.Thread):
 				self.handleStartingGame(receivedData)
 
 	def handleStartingGame(self, receivedData: list[bytes]):
+		serverActionType = None
+		for actionType in ServerActionType:
+			if receivedData[0].decode() == actionType.name:
+				serverActionType = actionType
+		receivedData = receivedData[1:]
 		gameManager = self.connectionHandler.main.gameHandler.gameManager
 		gameWindowController = self.connectionHandler.main.guiHandler.gameWindowHandler.gameWindowController
-		match gameManager.getGameState():
-			case GameStates.CHANGING_WIND:
+		match serverActionType:
+			case ServerActionType.CHANGE_WIND:
 				selfWind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
 				gameWindowController.triggerSetPlayerWind(selfWind)
 				gameManager.setSelfWind(selfWind)
-				gameManager.setGameState(GameStates.GETTING_CARDS)
-			case GameStates.GETTING_CARDS:
+			case ServerActionType.START_SEND_CARDS:
 				cardsStrs = receivedData
 				cards = list[CardType]()
 				for cardStr in cardsStrs:
 					cards.append(gameManager.gameHandler.getCardTypeByName(cardStr.decode()))
 				gameManager.addCards(cards)
-			case GameStates.STARTED:
-				gameManager.sortAllCards()
+				gameManager.removeFlowers()
+			case ServerActionType.FLOWER_COUNT:
+				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
+				flowerCount = int.from_bytes(receivedData[1])
+				gameManager.setFlowerCount(wind, flowerCount)
 
 	def receiveEncryptedMessages(self) -> list[bytes]:
 		iv = self.receiveData(256)

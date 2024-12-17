@@ -1,3 +1,4 @@
+from game.ClientActionType import ClientActionType
 from utils.debugUtils import debugOutput
 
 
@@ -5,6 +6,10 @@ class SendMessageUtils:
 	def __init__(self, connectionHandler):
 		self.connectionHandler = connectionHandler
 		self.socket = connectionHandler.socket
+
+	def sendClientActionType(self, clientActionType: ClientActionType, messages: list):
+		newList = [clientActionType.name.encode()] + messages
+		self.sendEncryptByteList(newList)
 
 	def sendBytes(self, message: bytes):
 		self.socket.sendall(message)

@@ -10,6 +10,7 @@ from utils.debugUtils import debugOutput
 class GameWindowHandler(QMainWindow):
 	def __init__(self, guiHandler):
 		super().__init__()
+		self.wind = None
 		self.ui = Ui_MainWindow()
 		self.guiHandler = guiHandler
 		self.gameWindowController = GameWindowController(self)
@@ -24,6 +25,7 @@ class GameWindowHandler(QMainWindow):
 		self.gameWindowController.setPlayerWind.connect(self.setPlayerWind)
 		self.gameWindowController.addCards.connect(self.gotCards)
 		self.gameWindowController.setAllCards.connect(self.setAllCards)
+		self.gameWindowController.setFlowerCount.connect(self.setFlowerCount)
 
 		flowerPixmap = QPixmap("assets/flower/flower.png").scaledToHeight(48)
 		self.ui.selfFlowerIcon.setPixmap(flowerPixmap)
@@ -36,6 +38,76 @@ class GameWindowHandler(QMainWindow):
 		self.setRotatedText(self.ui.oppositeFlowerCount, "0", 180)
 		self.setRotatedText(self.ui.rightFlowerCount, "0", 270)
 		debugOutput("inited")
+
+	def setFlowerCount(self, wind: Winds, flowerCount: int):
+		if wind == self.wind:
+			self.setRotatedText(self.ui.selfFlowerCount, str(flowerCount), 0)
+		elif self.windToSide(wind) == "left":
+			self.setRotatedText(self.ui.leftFlowerCount, str(flowerCount), 90)
+		elif self.windToSide(wind) == "opposite":
+			self.setRotatedText(self.ui.oppositeFlowerCount, str(flowerCount), 180)
+		elif self.windToSide(wind) == "right":
+			self.setRotatedText(self.ui.rightFlowerCount, str(flowerCount), 270)
+
+	def sideToWind(self, side: str) -> Winds:
+		if self.wind == Winds.EAST:
+			if side == "left":
+				return Winds.SOUTH
+			elif side == "opposite":
+				return Winds.WEST
+			elif side == "right":
+				return Winds.NORTH
+		elif self.wind == Winds.SOUTH:
+			if side == "left":
+				return Winds.WEST
+			elif side == "opposite":
+				return Winds.NORTH
+			elif side == "right":
+				return Winds.EAST
+		elif self.wind == Winds.WEST:
+			if side == "left":
+				return Winds.NORTH
+			elif side == "opposite":
+				return Winds.EAST
+			elif side == "right":
+				return Winds.SOUTH
+		elif self.wind == Winds.NORTH:
+			if side == "left":
+				return Winds.EAST
+			elif side == "opposite":
+				return Winds.SOUTH
+			elif side == "right":
+				return Winds.WEST
+
+	def windToSide(self, target_wind: Winds) -> str:
+		if self.wind == Winds.EAST:
+			if target_wind == Winds.SOUTH:
+				return "left"
+			elif target_wind == Winds.WEST:
+				return "opposite"
+			elif target_wind == Winds.NORTH:
+				return "right"
+		elif self.wind == Winds.SOUTH:
+			if target_wind == Winds.WEST:
+				return "left"
+			elif target_wind == Winds.NORTH:
+				return "opposite"
+			elif target_wind == Winds.EAST:
+				return "right"
+		elif self.wind == Winds.WEST:
+			if target_wind == Winds.NORTH:
+				return "left"
+			elif target_wind == Winds.EAST:
+				return "opposite"
+			elif target_wind == Winds.SOUTH:
+				return "right"
+		elif self.wind == Winds.NORTH:
+			if target_wind == Winds.EAST:
+				return "left"
+			elif target_wind == Winds.SOUTH:
+				return "opposite"
+			elif target_wind == Winds.WEST:
+				return "right"
 
 	def setRotatedText(self, widget: QLabel, text: str, degree: int):
 		if degree == 90 or degree == 270:
@@ -115,6 +187,7 @@ class GameWindowHandler(QMainWindow):
 			self.addedCards.append(newPushButton)
 
 	def setPlayerWind(self, wind: Winds):
+		self.wind = wind
 		eastPixmap = QPixmap("assets/wind/east.png")
 		southPixmap = QPixmap("assets/wind/south.png")
 		westPixmap = QPixmap("assets/wind/west.png")

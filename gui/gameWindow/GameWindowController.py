@@ -8,6 +8,7 @@ class GameWindowController(QObject):
 	setPlayerWind = Signal(Winds)
 	addCards = Signal(list)
 	setAllCards = Signal(list)
+	setFlowerCount = Signal(Winds, int)
 
 	def __init__(self, gameWindowHandler):
 		super().__init__()
@@ -21,3 +22,6 @@ class GameWindowController(QObject):
 
 	def triggerAddCards(self, cardTypes: list[CardType]):
 		self.addCards.emit(cardTypes)
+
+	def triggerSetFlowerCount(self, wind: Winds, flowerCount: int):
+		self.setFlowerCount.emit(wind, flowerCount)

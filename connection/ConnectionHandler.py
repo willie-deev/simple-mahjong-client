@@ -5,7 +5,6 @@ from enum import Enum
 from connection.EncryptionUtils import EncryptionUtils
 from connection.ReceiveMessageThread import ReceiveMessageThread
 from connection.SendMessageUtils import SendMessageUtils
-from game.GameStates import GameStates
 from utils.debugUtils import debugOutput
 
 
@@ -51,7 +50,6 @@ class ConnectionHandler:
 		self.main.guiHandler.connectWindowHandler.connectWindowController.triggerUpdatePlayerCount(
 			"Connected\nWaiting for other players...\nConnected player count: 4 / 4")
 		self.setConnectionState(ConnectionStates.STARTING)
-		self.main.gameHandler.gameManager.setGameState(GameStates.CHANGING_WIND)
 		self.main.guiHandler.app.exit()
 
 
