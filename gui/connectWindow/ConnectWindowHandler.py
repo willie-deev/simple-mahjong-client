@@ -8,11 +8,12 @@ class ConnectWindowHandler(QMainWindow):
 	def __init__(self, guiHandler):
 		super().__init__()
 		self.ui = Ui_MainWindow()
-		self.guiHandler = guiHandler
+		from gui.GuiHandler import GuiHandler
+		self.guiHandler: GuiHandler = guiHandler
 		self.connectWindowController = ConnectWindowController(self)
 
 	def setupUi(self):
-		self.ui.setupUi(self.guiHandler.mainWindow)
+		self.ui.setupUi(self)
 		self.ui.connectToServer.clicked.connect(self.clicked)
 		self.connectWindowController.updatePlayerCount.connect(self.ui.debugOutput.setText)
 		if debugUtils.debug:
@@ -21,8 +22,10 @@ class ConnectWindowHandler(QMainWindow):
 			self.clicked()
 
 	def clicked(self):
+		connectionHandler = self.guiHandler.main.connectionHandler
+
 		try:
-			self.guiHandler.main.connectionHandler.connectToServer(self.ui.ip.text(), int(self.ui.port.text()))
+			connectionHandler.connectToServer(self.ui.ip.text(), int(self.ui.port.text()))
 		except Exception as e:
 			self.ui.debugOutput.setText("Debug Output:\n" + str(e))
 			debugOutput(e)
@@ -32,4 +35,4 @@ class ConnectWindowHandler(QMainWindow):
 			self.ui.label.deleteLater()
 			self.ui.connectToServer.deleteLater()
 			self.ui.debugOutput.clear()
-			self.guiHandler.main.connectionHandler.runWaitForPlayersThread()
+			connectionHandler.runWaitForPlayersThread()

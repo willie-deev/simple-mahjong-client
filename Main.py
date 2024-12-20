@@ -5,8 +5,8 @@ from gui.GuiHandler import GuiHandler
 
 class Main:
 	def __init__(self):
-		self.guiHandler = GuiHandler(self)
 		self.connectionHandler = ConnectionHandler(self)
+		self.guiHandler = GuiHandler(self)
 		self.gameHandler = GameHandler(self)
 
 	def main(self):

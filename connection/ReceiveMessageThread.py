@@ -27,13 +27,13 @@ class ReceiveMessageThread(threading.Thread):
 
 	def run(self):
 		from connection.ConnectionHandler import ConnectionStates
-		if self.connectionHandler.connectionState == ConnectionStates.CONNECTED:
+		if self.connectionHandler.getConnectionState() == ConnectionStates.CONNECTED:
 			self.receivedKey = self.receiveData(450)
 			self.receivedKeyExchangeEvent.set()
 		while True:
 			receivedData: list[bytes] = self.receiveEncryptedMessages()
 
-			if self.connectionHandler.connectionState == ConnectionStates.KEY_EXCHANGED:
+			if self.connectionHandler.getConnectionState() == ConnectionStates.KEY_EXCHANGED:
 				playerCount = int.from_bytes(receivedData[0])
 				self.receivedPlayerCount = playerCount
 				self.receivedPlayerCountEvent.set()

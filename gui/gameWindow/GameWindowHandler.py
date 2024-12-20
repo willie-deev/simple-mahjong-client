@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QPushButton
+from PySide6.QtGui import Qt
 
 from game.CardType import CardType
 from game.Winds import Winds
@@ -10,14 +10,32 @@ from utils.debugUtils import debugOutput
 class GameWindowHandler(QMainWindow):
 	def __init__(self, guiHandler):
 		super().__init__()
+		self.overlay = None
 		self.wind = None
 		self.ui = Ui_MainWindow()
 		self.guiHandler = guiHandler
 		self.gameWindowController = GameWindowController(self)
 		self.addedCards = list[QPushButton]()
 
+	def resizeEvent(self, event):
+		super().resizeEvent(event)
+		self.resizeOverlay()
+
+	def resizeOverlay(self):
+		# overlay_width = 500
+		# overlay_height = 500
+		# self.overlay.setFixedSize(overlay_width, overlay_height)
+		# self.overlay.setMinimumSize(overlay_width, overlay_height)
+		#
+		# parent_width = self.width()
+		# parent_height = self.height()
+		# center_x = (parent_width - overlay_width) // 2
+		# center_y = (parent_height - overlay_height) // 2
+		# self.overlay.setGeometry(center_x, center_y, overlay_width, overlay_height)
+		self.overlay.setGeometry(self.rect().width()//4, self.rect().height()//1.5, self.rect().width()//2, self.rect().height()//3)
+
 	def setupUi(self):
-		self.ui.setupUi(self.guiHandler.mainWindow)
+		self.ui.setupUi(self)
 		icon = QIcon("/home/willie/PycharmProjects/simple-mahjong-client/assets/character/1.png")
 		debugOutput(icon.isNull())
 
@@ -37,6 +55,59 @@ class GameWindowHandler(QMainWindow):
 		self.setRotatedText(self.ui.leftFlowerCount, "0", 90)
 		self.setRotatedText(self.ui.oppositeFlowerCount, "0", 180)
 		self.setRotatedText(self.ui.rightFlowerCount, "0", 270)
+
+		self.overlay = QWidget(self,)
+		self.overlay.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+		self.overlay.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+		self.overlay.setStyleSheet("background: rgba(0, 0, 0, 100);")
+
+		self.resizeOverlay()
+
+		self.layout = QVBoxLayout(self.overlay)
+		self.layout.setContentsMargins(10, 10, 10, 10)
+
+		overlay_label = QWidget(self.overlay)
+		overlay_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
+		self.layout2 = QHBoxLayout(overlay_label)
+		self.layout2.setContentsMargins(10, 10, 10, 10)
+
+		push_button = QPushButton("按鈕")
+		push_button.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+		push_button.setText("test")
+		sizePolicy = QSizePolicy(push_button.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Expanding)
+		push_button.setSizePolicy(sizePolicy)
+		push_button.setStyleSheet("""
+    QPushButton {
+        background-color: lightgray;
+        color: black;
+        font-size: 14px;
+        border: none;
+        padding: 6px;
+    }
+    QPushButton:hover {
+        background-color: darkgray;
+    }
+    QPushButton:pressed {
+        background-color: gray;
+    }
+""")
+
+		push_button2 = QPushButton("按鈕")
+		push_button2.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+		push_button2.setText("test")
+		sizePolicy = QSizePolicy(push_button.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Expanding)
+		push_button2.setSizePolicy(sizePolicy)
+		# push_button.setMaximumSize(QSize(16777215, 16777215))
+
+		self.layout.addWidget(overlay_label)
+		self.layout2.addWidget(push_button)
+		self.layout2.addWidget(push_button2)
+		# self.layout.addWidget(push_button)
+		self.layout.addStretch()
+		self.overlay.setGeometry(self.rect())
+
+		# self.guiHandler.mainWindow.show()
 		debugOutput("inited")
 
 	def setFlowerCount(self, wind: Winds, flowerCount: int):

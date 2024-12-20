@@ -10,17 +10,21 @@ from utils.debugUtils import debugOutput
 
 class ConnectionHandler:
 	def __init__(self, main):
-		self.connectionState = ConnectionStates.NOT_CONNECTED
-		self.receiveMessageThread = None
+		self.connectionState = None
+		self.setConnectionState(ConnectionStates.NOT_CONNECTED)
 		self.main = main
+		self.encryptionUtils = EncryptionUtils(self)
+		self.receiveMessageThread = None
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sendMessageUtils = SendMessageUtils(self)
 		self.connectedPlayerCount = 0
-		self.encryptionUtils = EncryptionUtils(self)
 
 	def setConnectionState(self, connectionState):
 		self.connectionState = connectionState
 		debugOutput(connectionState.name)
+
+	def getConnectionState(self):
+		return self.connectionState
 
 	def connectToServer(self, ip: str, port: int):
 		self.socket.connect((ip, port))

@@ -7,20 +7,21 @@ from gui.gameWindow.GameWindowHandler import GameWindowHandler
 
 class GuiHandler:
 	def __init__(self, main):
-		self.main = main
+		from Main import Main
+		self.main: Main = main
 		self.app = QApplication([])
-		self.mainWindow = QMainWindow()
 		self.connectWindowHandler = ConnectWindowHandler(self)
-		self.gameWindowHandler = GameWindowHandler(self)
+		self.gameWindowHandler = None
 
 	def showConnectWindow(self):
 		self.connectWindowHandler.setupUi()
-		self.mainWindow.show()
+		self.connectWindowHandler.show()
 		self.app.exec()
-		if self.main.connectionHandler.connectionState == ConnectionStates.STARTING:
+		if self.main.connectionHandler.getConnectionState() == ConnectionStates.STARTING:
 			self.showGameWindow()
 
 	def showGameWindow(self):
+		self.gameWindowHandler = GameWindowHandler(self)
 		self.gameWindowHandler.setupUi()
-		self.mainWindow.show()
+		self.gameWindowHandler.show()
 		self.app.exec()
