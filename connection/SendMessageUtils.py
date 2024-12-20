@@ -4,10 +4,13 @@ from utils.debugUtils import debugOutput
 
 class SendMessageUtils:
 	def __init__(self, connectionHandler):
-		self.connectionHandler = connectionHandler
+		from connection.ConnectionHandler import ConnectionHandler
+		self.connectionHandler: ConnectionHandler = connectionHandler
+
 		self.socket = connectionHandler.socket
 
-		self.encryptionUtils = connectionHandler.encryptionUtils
+		from connection.EncryptionUtils import EncryptionUtils
+		self.encryptionUtils: EncryptionUtils = connectionHandler.encryptionUtils
 
 	def sendClientActionType(self, clientActionType: ClientActionType, messages: list):
 		newList = [clientActionType.name.encode()] + messages

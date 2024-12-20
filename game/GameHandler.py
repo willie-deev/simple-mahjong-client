@@ -1,12 +1,14 @@
 from game.CardType import CardType
 from game.GameManager import GameManager
-from game.Winds import Winds
+from game.Wind import Wind
 from utils.debugUtils import debugOutput
 
 
 class GameHandler:
 	def __init__(self, main):
-		self.main = main
+		from Main import Main
+		self.main: Main = main
+
 		self.gameManager = GameManager(self)
 		self.cardNumberTypeList = list[CardType]()
 		for cardType in CardType:
@@ -20,7 +22,7 @@ class GameHandler:
 			debugOutput(str(i) + "\t" + str(self.cardNumberTypeList[i]))
 
 	def getWindByName(self, name):
-		for wind in Winds:
+		for wind in Wind:
 			if wind.name == name:
 				return wind
 

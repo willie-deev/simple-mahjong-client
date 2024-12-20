@@ -7,7 +7,9 @@ from utils.debugUtils import debugOutput
 
 class EncryptionUtils:
 	def __init__(self, connectionHandler):
-		self.connectionHandler = connectionHandler
+		from connection.ConnectionHandler import ConnectionHandler
+		self.connectionHandler: ConnectionHandler = connectionHandler
+
 		self.keyPair = RSA.generate(2048)
 		self.serverPublicKey = None
 		self.receivedMessageRsaDecrypter = PKCS1_OAEP.new(self.keyPair)

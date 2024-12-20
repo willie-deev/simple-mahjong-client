@@ -7,12 +7,14 @@ from utils.debugUtils import debugOutput
 
 class ReceiveMessageThread(threading.Thread):
 	def __init__(self, connectionHandler):
+		from connection.ConnectionHandler import ConnectionHandler
+		self.connectionHandler: ConnectionHandler = connectionHandler
+
 		threading.Thread.__init__(self)
 		self.receivedPlayerCountEvent = threading.Event()
 		self.receivedPlayerCount = int
 		self.receivedKeyExchangeEvent = threading.Event()
 		self.receivedKey = bytes()
-		self.connectionHandler = connectionHandler
 		self.socket = connectionHandler.socket
 
 	def waitForPlayerCount(self):
@@ -52,6 +54,7 @@ class ReceiveMessageThread(threading.Thread):
 			case ServerActionType.CHANGE_WIND:
 				selfWind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
 				gameWindowController.triggerSetPlayerWind(selfWind)
+				gameManager.setupVariables()
 				gameManager.setSelfWind(selfWind)
 			case ServerActionType.START_SEND_CARDS:
 				cardsStrs = receivedData
@@ -59,7 +62,13 @@ class ReceiveMessageThread(threading.Thread):
 				for cardStr in cardsStrs:
 					cards.append(gameManager.gameHandler.getCardTypeByName(cardStr.decode()))
 				gameManager.addCards(cards)
+			case ServerActionType.START_FLOWER_REPLACEMENT:
+				cardsStrs = receivedData
+				cards = list[CardType]()
+				for cardStr in cardsStrs:
+					cards.append(gameManager.gameHandler.getCardTypeByName(cardStr.decode()))
 				gameManager.removeFlowers()
+				gameManager.addCards(cards, False)
 			case ServerActionType.FLOWER_COUNT:
 				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
 				flowerCount = int.from_bytes(receivedData[1])

@@ -10,6 +10,7 @@ class GuiHandler:
 		from Main import Main
 		self.main: Main = main
 		self.app = QApplication([])
+		self.app.setStyle("Breeze")
 		self.connectWindowHandler = ConnectWindowHandler(self)
 		self.gameWindowHandler = None
 

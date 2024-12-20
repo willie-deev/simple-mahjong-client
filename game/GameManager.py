@@ -1,63 +1,76 @@
+from typing import Optional
+
 from game.CardType import CardType
 from game.ClientActionType import ClientActionType
-from game.Winds import Winds
+from game.Wind import Wind
 from utils.debugUtils import debugOutput
 
 
 class GameManager:
 	def __init__(self, gameHandler):
-		self.gameHandler = gameHandler
+		from game.GameHandler import GameHandler
+		self.gameHandler: GameHandler = gameHandler
+
 		self.selfWind = None
 		self.gotCards = list[CardType]()
-		self.sendMessageUtils = gameHandler.main.connectionHandler.sendMessageUtils
 		self.orderNumberWindMap = None
 
-	def setSelfWind(self, selfWind: Winds):
+		from connection.SendMessageUtils import SendMessageUtils
+		from gui.gameWindow.GameWindowController import GameWindowController
+		self.sendMessageUtils: SendMessageUtils = gameHandler.main.connectionHandler.sendMessageUtils
+		self.gameWindowController: Optional[GameWindowController] = None
+
+	def setupVariables(self):
+		self.gameWindowController = self.gameHandler.main.guiHandler.gameWindowHandler.gameWindowController
+
+	def setSelfWind(self, selfWind: Wind):
 		self.selfWind = selfWind
 		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_CARDS, [])
 		debugOutput(selfWind)
 
-	def setFlowerCount(self, wind: Winds, flowerCount: int):
-		self.gameHandler.main.guiHandler.gameWindowHandler.gameWindowController.triggerSetFlowerCount(wind, flowerCount)
+	def setFlowerCount(self, wind: Wind, flowerCount: int):
+		gameWindowController = self.gameWindowController
+		gameWindowController.triggerSetFlowerCount(wind, flowerCount)
+		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_FLOWER_COUNT, [])
 
-	def windToOrderNumber(self, wind: Winds):
-		if wind == Winds.EAST:
+	def windToOrderNumber(self, wind: Wind):
+		if wind == Wind.EAST:
 			return 0
-		elif wind == Winds.SOUTH:
+		elif wind == Wind.SOUTH:
 			return 1
-		elif wind == Winds.WEST:
+		elif wind == Wind.WEST:
 			return 2
-		elif wind == Winds.NORTH:
+		elif wind == Wind.NORTH:
 			return 3
 
 	def orderNumberToWind(self, orderNumber: int):
 		if orderNumber == 0:
-			return Winds.EAST
+			return Wind.EAST
 		elif orderNumber == 1:
-			return Winds.SOUTH
+			return Wind.SOUTH
 		elif orderNumber == 2:
-			return Winds.WEST
+			return Wind.WEST
 		elif orderNumber == 3:
-			return Winds.NORTH
+			return Wind.NORTH
 
 	def getSelfWind(self):
 		return self.selfWind
 
-	def addCards(self, cards: list[CardType]):
+	def addCards(self, cards: list[CardType], sortCards: bool = True):
 		for card in cards:
 			self.gotCards.append(card)
 		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_CARDS, [])
-		self.gameHandler.main.guiHandler.gameWindowHandler.gameWindowController.triggerAddCards(cards)
-		if len(self.gotCards) >= 16:
-			self.sortAllCards()
+		self.gameWindowController.triggerAddCards(cards)
+		self.sortAllCards()
 			# self.gameHandler.main.connectionHandler.sendMessageUtils.sendEncryptBytes()
+		print(self.gotCards)
 
 	def removeFlowers(self):
-		for card in self.gotCards:
-			if card == CardType.FLOWER:
-				self.gotCards.remove(card)
-		self.gameHandler.main.guiHandler.gameWindowHandler.gameWindowController.triggerSetAllCards(self.gotCards)
+		self.sortAllCards()
+		while CardType.FLOWER in self.gotCards:
+			self.gotCards.remove(CardType.FLOWER)
+		self.gameWindowController.triggerSetAllCards(self.gotCards)
 
 	def sortAllCards(self):
 		self.gotCards.sort(key=lambda v: v.value, reverse=True)
-		self.gameHandler.main.guiHandler.gameWindowHandler.gameWindowController.triggerSetAllCards(self.gotCards)
+		self.gameWindowController.triggerSetAllCards(self.gotCards)

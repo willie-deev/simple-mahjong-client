@@ -10,9 +10,11 @@ from utils.debugUtils import debugOutput
 
 class ConnectionHandler:
 	def __init__(self, main):
+		from Main import Main
+		self.main: Main = main
+
 		self.connectionState = None
 		self.setConnectionState(ConnectionStates.NOT_CONNECTED)
-		self.main = main
 		self.encryptionUtils = EncryptionUtils(self)
 		self.receiveMessageThread = None
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
