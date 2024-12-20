@@ -1,6 +1,3 @@
-from pickletools import long1
-from shutil import chown
-from time import sleep
 from typing import Optional
 
 from PySide6.QtCore import QMargins
@@ -26,6 +23,7 @@ class GameWindowHandler(QMainWindow):
 	def resizeEvent(self, event):
 		super().resizeEvent(event)
 		self.resizeOverlay()
+		self.resizeCardButtons()
 
 
 	def setupUi(self):
@@ -35,9 +33,10 @@ class GameWindowHandler(QMainWindow):
 
 		self.ui.selfCards.update()
 		self.gameWindowController.setPlayerWind.connect(self.setPlayerWind)
-		self.gameWindowController.addCards.connect(self.gotCards)
+		self.gameWindowController.startAddCards.connect(self.startAddCards)
 		self.gameWindowController.setAllCards.connect(self.setAllCards)
 		self.gameWindowController.setFlowerCount.connect(self.setFlowerCount)
+		self.gameWindowController.gotNewCard.connect(self.gotNewCard)
 
 		flowerPixmap = QPixmap("assets/flower/flower.png").scaledToHeight(48)
 		self.ui.selfFlowerIcon.setPixmap(flowerPixmap)
@@ -54,6 +53,17 @@ class GameWindowHandler(QMainWindow):
 
 		# self.guiHandler.mainWindow.show()
 		debugOutput("inited")
+
+	def resizeCardButtons(self):
+		for card in self.addedCards:
+			height = self.ui.selfCards.height() // 4 * 3
+			width = height // 3 * 2
+			padding = width // 8
+			card.setIconSize(QSize(width, height))
+			card.setStyleSheet(f"""
+				padding-left: {padding}px;
+				padding-right: {padding}px;
+			""")
 
 	def resizeOverlay(self):
 		if self.overlay is not None and not self.overlay.isHidden():
@@ -80,6 +90,24 @@ class GameWindowHandler(QMainWindow):
 	def hideActionsMenu(self):
 		self.overlay.hide()
 
+	def getActionButton(self, name: str, text: str):
+		button = QPushButton(name)
+		button.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+		button.setText(text)
+		button.setFont(QFont("Noto Sans", 24))
+		sizePolicy = QSizePolicy(button.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Expanding)
+		button.setSizePolicy(sizePolicy)
+		button.setStyleSheet("""
+					QPushButton {
+		        		background-color: rgba(0, 0, 0, 100);
+		        		border-radius: 10px;
+		    		}
+		    		QPushButton:hover {
+		       			background-color: rgba(0, 0, 0, 200);
+		    		}
+		    	""")
+		return button
+
 	def setupActionsMenu(self):
 		self.overlay = QWidget(self)
 		# self.overlay.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
@@ -90,85 +118,15 @@ class GameWindowHandler(QMainWindow):
 
 		self.resizeOverlay()
 
-		chowButton = QPushButton()
-		chowButton.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-		chowButton.setText("Chow")
-		chowButton.setFont(QFont("Noto Sans", 24))
-		sizePolicy = QSizePolicy(chowButton.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Expanding)
-		chowButton.setSizePolicy(sizePolicy)
-		chowButton.setStyleSheet("""
-			QPushButton {
-        		background-color: rgba(0, 0, 0, 100);
-        		border-radius: 10px;
-    		}
-    		QPushButton:hover {
-       			background-color: rgba(0, 0, 0, 200);
-    		}
-    	""")
+		chowButton = self.getActionButton("chow", "Chow")
 
-		pungButton = QPushButton()
-		pungButton.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-		pungButton.setText("Pung")
-		pungButton.setFont(QFont("Noto Sans", 24))
-		sizePolicy = QSizePolicy(pungButton.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Expanding)
-		pungButton.setSizePolicy(sizePolicy)
-		pungButton.setStyleSheet("""
-			QPushButton {
-        		background-color: rgba(0, 0, 0, 100);
-        		border-radius: 10px;
-    		}
-    		QPushButton:hover {
-       			background-color: rgba(0, 0, 0, 200);
-    		}
-    	""")
+		pungButton = self.getActionButton("pung", "Pung")
 
-		kongButton = QPushButton()
-		kongButton.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-		kongButton.setText("Kong")
-		kongButton.setFont(QFont("Noto Sans", 24))
-		sizePolicy = QSizePolicy(kongButton.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Expanding)
-		kongButton.setSizePolicy(sizePolicy)
-		kongButton.setStyleSheet("""
-			QPushButton {
-        		background-color: rgba(0, 0, 0, 100);
-        		border-radius: 10px;
-    		}
-    		QPushButton:hover {
-       			background-color: rgba(0, 0, 0, 200);
-    		}
-    	""")
+		kongButton = self.getActionButton("kong", "Kong")
 
-		tenpaiButton = QPushButton()
-		tenpaiButton.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-		tenpaiButton.setText("Ready")
-		tenpaiButton.setFont(QFont("Noto Sans", 24))
-		sizePolicy = QSizePolicy(tenpaiButton.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Expanding)
-		tenpaiButton.setSizePolicy(sizePolicy)
-		tenpaiButton.setStyleSheet("""
-			QPushButton {
-        		background-color: rgba(0, 0, 0, 100);
-        		border-radius: 10px;
-    		}
-    		QPushButton:hover {
-       			background-color: rgba(0, 0, 0, 200);
-    		}
-    	""")
+		readyButton = self.getActionButton("ready", "Ready")
 
-		winButton = QPushButton()
-		winButton.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-		winButton.setText("Win")
-		winButton.setFont(QFont("Noto Sans", 24))
-		sizePolicy = QSizePolicy(winButton.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Expanding)
-		winButton.setSizePolicy(sizePolicy)
-		winButton.setStyleSheet("""
-			QPushButton {
-        		background-color: rgba(0, 0, 0, 100);
-        		border-radius: 10px;
-    		}
-    		QPushButton:hover {
-       			background-color: rgba(0, 0, 0, 200);
-    		}
-    	""")
+		winButton = self.getActionButton("win", "Win")
 
 		expandingLabel = QWidget(self.overlay)
 		expandingLabel.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -183,7 +141,7 @@ class GameWindowHandler(QMainWindow):
 		layout2.addWidget(chowButton)
 		layout2.addWidget(pungButton)
 		layout2.addWidget(kongButton)
-		layout2.addWidget(tenpaiButton)
+		layout2.addWidget(readyButton)
 		layout2.addWidget(winButton)
 
 	def setFlowerCount(self, wind: Wind, flowerCount: int):
@@ -283,55 +241,69 @@ class GameWindowHandler(QMainWindow):
 			# self.ui.selfCards.layout().removeWidget(addedCard)
 			addedCard.deleteLater()
 		self.addedCards.clear()
-		self.gotCards(cardTypes)
+		self.startAddCards(cardTypes)
+		self.resizeCardButtons()
 
-	def gotCards(self, cardTypes: list[CardType]):
+	def getCardButton(self, cardType: CardType):
+		if "CHARACTER" in cardType.name:
+			number = cardType.name.split("_")[1]
+			path = f"assets/character/{number}.png"
+		elif "DOT" in cardType.name:
+			number = cardType.name.split("_")[1]
+			path = f"assets/dot/{number}.png"
+		elif "BAMBOO" in cardType.name:
+			number = cardType.name.split("_")[1]
+			path = f"assets/bamboo/{number}.png"
+		elif "WIND" in cardType.name:
+			wind = cardType.name.split("_")[0].lower()
+			path = f"assets/wind/{wind}.png"
+		elif "DRAGON" in cardType.name:
+			dragon = cardType.name.split("_")[0].lower()
+			path = f"assets/dragon/{dragon}.png"
+		else:
+			path = f"assets/flower/flower.png"
+		pixmap = QPixmap(path)
+		scaled_pixmap = pixmap.scaled(600, 800)
+		icon = QIcon(scaled_pixmap)
+		newPushButton = QPushButton("")
+		# newPushButton.setObjectName(u"2")
+		sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+		sizePolicy1.setHorizontalStretch(0)
+		sizePolicy1.setVerticalStretch(0)
+		sizePolicy1.setHeightForWidth(newPushButton.sizePolicy().hasHeightForWidth())
+		newPushButton.setSizePolicy(sizePolicy1)
+		newPushButton.setMinimumSize(QSize(1, 1))
+		newPushButton.setMaximumSize(QSize(16777215, 16777215))
+		# newPushButton.setMaximumSize(QSize(70, 100))
+		newPushButton.setBaseSize(QSize(0, 0))
+		font = QFont()
+		font.setPointSize(12)
+		font.setBold(False)
+		font.setStrikeOut(False)
+		font.setKerning(True)
+		newPushButton.setFont(font)
+		# newPushButton.setStyleSheet(f"padding: 0px;")
+		newPushButton.setCheckable(False)
+		newPushButton.setFlat(False)
+
+		newPushButton.setIcon(icon)
+		newPushButton.setIconSize(QSize(60, 80))
+
+		return newPushButton
+
+	def gotNewCard(self, cardType: CardType):
+		newPushButton = self.getCardButton(cardType)
+		# self.ui.selfCards.layout().addWidget(newPushButton)
+		self.ui.selfCards.layout().insertWidget(self.ui.selfCards.layout().count()-1, newPushButton)
+		self.addedCards.append(newPushButton)
+		self.resizeCardButtons()
+
+	def startAddCards(self, cardTypes: list[CardType]):
 		for cardType in cardTypes:
-			if "CHARACTER" in cardType.name:
-				number = cardType.name.split("_")[1]
-				path = f"assets/character/{number}.png"
-			elif "DOT" in cardType.name:
-				number = cardType.name.split("_")[1]
-				path = f"assets/dot/{number}.png"
-			elif "BAMBOO" in cardType.name:
-				number = cardType.name.split("_")[1]
-				path = f"assets/bamboo/{number}.png"
-			elif "WIND" in cardType.name:
-				wind = cardType.name.split("_")[0].lower()
-				path = f"assets/wind/{wind}.png"
-			elif "DRAGON" in cardType.name:
-				dragon = cardType.name.split("_")[0].lower()
-				path = f"assets/dragon/{dragon}.png"
-			else:
-				path = f"assets/flower/flower.png"
-			pixmap = QPixmap(path)
-			scaled_pixmap = pixmap.scaled(60, 80)
-			icon = QIcon(scaled_pixmap)
-			newPushButton = QPushButton("")
-			# newPushButton.setObjectName(u"2")
-			sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-			sizePolicy1.setHorizontalStretch(0)
-			sizePolicy1.setVerticalStretch(0)
-			sizePolicy1.setHeightForWidth(newPushButton.sizePolicy().hasHeightForWidth())
-			newPushButton.setSizePolicy(sizePolicy1)
-			newPushButton.setMinimumSize(QSize(1, 1))
-			newPushButton.setMaximumSize(QSize(16777215, 100))
-			# newPushButton.setMaximumSize(QSize(70, 100))
-			newPushButton.setBaseSize(QSize(0, 0))
-			font = QFont()
-			font.setPointSize(12)
-			font.setBold(False)
-			font.setStrikeOut(False)
-			font.setKerning(True)
-			newPushButton.setFont(font)
-			newPushButton.setStyleSheet(f"padding: 0px;")
-			newPushButton.setCheckable(False)
-			newPushButton.setFlat(False)
-
-			newPushButton.setIcon(icon)
-			newPushButton.setIconSize(QSize(60, 80))
-			self.ui.selfCards.layout().insertWidget(1, newPushButton)
+			newPushButton = self.getCardButton(cardType)
+			self.ui.selfCards.layout().insertWidget(self.ui.selfCards.layout().count()-2, newPushButton)
 			self.addedCards.append(newPushButton)
+		self.resizeCardButtons()
 
 	def setPlayerWind(self, wind: Wind):
 		self.wind = wind

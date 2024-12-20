@@ -10,7 +10,6 @@ class GuiHandler:
 		from Main import Main
 		self.main: Main = main
 		self.app = QApplication([])
-		self.app.setStyle("Breeze")
 		self.connectWindowHandler = ConnectWindowHandler(self)
 		self.gameWindowHandler = None
 
@@ -18,6 +17,7 @@ class GuiHandler:
 		self.connectWindowHandler.setupUi()
 		self.connectWindowHandler.show()
 		self.app.exec()
+		self.connectWindowHandler.deleteLater()
 		if self.main.connectionHandler.getConnectionState() == ConnectionStates.STARTING:
 			self.showGameWindow()
 

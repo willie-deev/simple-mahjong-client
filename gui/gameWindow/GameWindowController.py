@@ -6,8 +6,9 @@ from game.Wind import Wind
 
 class GameWindowController(QObject):
 	setPlayerWind = Signal(Wind)
-	addCards = Signal(list)
+	startAddCards = Signal(list)
 	setAllCards = Signal(list)
+	gotNewCard = Signal(CardType)
 	setFlowerCount = Signal(Wind, int)
 
 	def __init__(self, gameWindowHandler):
@@ -20,8 +21,11 @@ class GameWindowController(QObject):
 	def triggerSetPlayerWind(self, wind: Wind):
 		self.setPlayerWind.emit(wind)
 
-	def triggerAddCards(self, cardTypes: list[CardType]):
-		self.addCards.emit(cardTypes)
+	def triggerStartAddCards(self, cardTypes: list[CardType]):
+		self.startAddCards.emit(cardTypes)
 
 	def triggerSetFlowerCount(self, wind: Wind, flowerCount: int):
 		self.setFlowerCount.emit(wind, flowerCount)
+
+	def triggerGotNewCard(self, cardType: CardType):
+		self.gotNewCard.emit(cardType)

@@ -56,17 +56,14 @@ class GameManager:
 	def getSelfWind(self):
 		return self.selfWind
 
-	def addCards(self, cards: list[CardType], sortCards: bool = True):
+	def startAddCards(self, cards: list[CardType]):
 		for card in cards:
 			self.gotCards.append(card)
 		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_CARDS, [])
-		self.gameWindowController.triggerAddCards(cards)
-		self.sortAllCards()
-			# self.gameHandler.main.connectionHandler.sendMessageUtils.sendEncryptBytes()
+		self.gameWindowController.triggerStartAddCards(cards)
 		print(self.gotCards)
 
 	def removeFlowers(self):
-		self.sortAllCards()
 		while CardType.FLOWER in self.gotCards:
 			self.gotCards.remove(CardType.FLOWER)
 		self.gameWindowController.triggerSetAllCards(self.gotCards)
@@ -74,3 +71,7 @@ class GameManager:
 	def sortAllCards(self):
 		self.gotCards.sort(key=lambda v: v.value, reverse=True)
 		self.gameWindowController.triggerSetAllCards(self.gotCards)
+
+	def gotNewCard(self, cardType: CardType):
+		self.gotCards.append(cardType)
+		self.gameWindowController.triggerGotNewCard(cardType)
