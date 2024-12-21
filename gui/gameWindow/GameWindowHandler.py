@@ -1,11 +1,11 @@
 from typing import Optional
 
-from PySide6.QtCore import QMargins
 from PySide6.QtGui import Qt
 
 from game.CardType import CardType
 from game.Wind import Wind
 from gui.gameWindow.GameWindowController import GameWindowController
+from gui.gameWindow.WidgetUtils import WidgetManager
 from gui.gameWindow.gameWindow import *
 from utils.debugUtils import debugOutput
 
@@ -18,12 +18,14 @@ class GameWindowHandler(QMainWindow):
 		self.ui = Ui_MainWindow()
 		self.guiHandler = guiHandler
 		self.gameWindowController = GameWindowController(self)
+		self.widgetUtils = WidgetManager(self)
 		self.addedCards = list[QPushButton]()
+		self.waitingForDiscard = False
 
 	def resizeEvent(self, event):
 		super().resizeEvent(event)
 		self.resizeOverlay()
-		self.resizeCardButtons()
+		self.updateCardButtons()
 
 
 	def setupUi(self):
@@ -37,33 +39,40 @@ class GameWindowHandler(QMainWindow):
 		self.gameWindowController.setAllCards.connect(self.setAllCards)
 		self.gameWindowController.setFlowerCount.connect(self.setFlowerCount)
 		self.gameWindowController.gotNewCard.connect(self.gotNewCard)
+		self.gameWindowController.waitDiscard.connect(self.waitDiscard)
 
-		flowerPixmap = QPixmap("assets/flower/flower.png").scaledToHeight(48)
-		self.ui.selfFlowerIcon.setPixmap(flowerPixmap)
-		self.ui.leftFlowerIcon.setPixmap(self.rotatePixmap(flowerPixmap, 90))
-		self.ui.oppositeFlowerIcon.setPixmap(self.rotatePixmap(flowerPixmap, 180))
-		self.ui.rightFlowerIcon.setPixmap(self.rotatePixmap(flowerPixmap, 270))
-
-		self.setRotatedText(self.ui.selfFlowerCount, "0", 0)
-		self.setRotatedText(self.ui.leftFlowerCount, "0", 90)
-		self.setRotatedText(self.ui.oppositeFlowerCount, "0", 180)
-		self.setRotatedText(self.ui.rightFlowerCount, "0", 270)
+		self.widgetUtils.setupFlowerIcons()
 		self.setupActionsMenu()
 		self.hideActionsMenu()
 
 		# self.guiHandler.mainWindow.show()
 		debugOutput("inited")
 
-	def resizeCardButtons(self):
+	def waitDiscard(self):
+		self.waitingForDiscard = True
+		self.updateCardButtons()
+
+	def discard(self):
+		if not self.waitingForDiscard:
+			return
+
+
+	def updateCardButtons(self):
 		for card in self.addedCards:
 			height = self.ui.selfCards.height() // 4 * 3
 			width = height // 3 * 2
-			padding = width // 8
+			padding = width // 7
+			borderRadius = padding
 			card.setIconSize(QSize(width, height))
-			card.setStyleSheet(f"""
-				padding-left: {padding}px;
-				padding-right: {padding}px;
-			""")
+			styleSheet = "QPushButton{"
+			styleSheet += "padding-left: " + str(padding) + "px;"
+			styleSheet += "padding-right: " + str(padding) + "px;"
+			styleSheet += "background-color: white; border-radius: "+ str(borderRadius)+ "px;"
+			styleSheet += "}"
+			if self.waitingForDiscard:
+				# card.setEnabled(False)
+				styleSheet += "QPushButton:hover { background-color: lightgray; }"
+			card.setStyleSheet(styleSheet)
 
 	def resizeOverlay(self):
 		if self.overlay is not None and not self.overlay.isHidden():
@@ -85,28 +94,9 @@ class GameWindowHandler(QMainWindow):
 
 	def showActionsMenu(self):
 		self.overlay.show()
-		self.setupActionsMenu()
 
 	def hideActionsMenu(self):
 		self.overlay.hide()
-
-	def getActionButton(self, name: str, text: str):
-		button = QPushButton(name)
-		button.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-		button.setText(text)
-		button.setFont(QFont("Noto Sans", 24))
-		sizePolicy = QSizePolicy(button.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Expanding)
-		button.setSizePolicy(sizePolicy)
-		button.setStyleSheet("""
-					QPushButton {
-		        		background-color: rgba(0, 0, 0, 100);
-		        		border-radius: 10px;
-		    		}
-		    		QPushButton:hover {
-		       			background-color: rgba(0, 0, 0, 200);
-		    		}
-		    	""")
-		return button
 
 	def setupActionsMenu(self):
 		self.overlay = QWidget(self)
@@ -118,15 +108,11 @@ class GameWindowHandler(QMainWindow):
 
 		self.resizeOverlay()
 
-		chowButton = self.getActionButton("chow", "Chow")
-
-		pungButton = self.getActionButton("pung", "Pung")
-
-		kongButton = self.getActionButton("kong", "Kong")
-
-		readyButton = self.getActionButton("ready", "Ready")
-
-		winButton = self.getActionButton("win", "Win")
+		chowButton = self.widgetUtils.getActionButton("chow", "Chow")
+		pungButton = self.widgetUtils.getActionButton("pung", "Pung")
+		kongButton = self.widgetUtils.getActionButton("kong", "Kong")
+		readyButton = self.widgetUtils.getActionButton("ready", "Ready")
+		winButton = self.widgetUtils.getActionButton("win", "Win")
 
 		expandingLabel = QWidget(self.overlay)
 		expandingLabel.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -146,95 +132,13 @@ class GameWindowHandler(QMainWindow):
 
 	def setFlowerCount(self, wind: Wind, flowerCount: int):
 		if wind == self.wind:
-			self.setRotatedText(self.ui.selfFlowerCount, str(flowerCount), 0)
-		elif self.windToSide(wind) == "left":
-			self.setRotatedText(self.ui.leftFlowerCount, str(flowerCount), 90)
-		elif self.windToSide(wind) == "opposite":
-			self.setRotatedText(self.ui.oppositeFlowerCount, str(flowerCount), 180)
-		elif self.windToSide(wind) == "right":
-			self.setRotatedText(self.ui.rightFlowerCount, str(flowerCount), 270)
-
-	def sideToWind(self, side: str) -> Wind:
-		if self.wind == Wind.EAST:
-			if side == "left":
-				return Wind.SOUTH
-			elif side == "opposite":
-				return Wind.WEST
-			elif side == "right":
-				return Wind.NORTH
-		elif self.wind == Wind.SOUTH:
-			if side == "left":
-				return Wind.WEST
-			elif side == "opposite":
-				return Wind.NORTH
-			elif side == "right":
-				return Wind.EAST
-		elif self.wind == Wind.WEST:
-			if side == "left":
-				return Wind.NORTH
-			elif side == "opposite":
-				return Wind.EAST
-			elif side == "right":
-				return Wind.SOUTH
-		elif self.wind == Wind.NORTH:
-			if side == "left":
-				return Wind.EAST
-			elif side == "opposite":
-				return Wind.SOUTH
-			elif side == "right":
-				return Wind.WEST
-
-	def windToSide(self, target_wind: Wind) -> str:
-		if self.wind == Wind.EAST:
-			if target_wind == Wind.SOUTH:
-				return "left"
-			elif target_wind == Wind.WEST:
-				return "opposite"
-			elif target_wind == Wind.NORTH:
-				return "right"
-		elif self.wind == Wind.SOUTH:
-			if target_wind == Wind.WEST:
-				return "left"
-			elif target_wind == Wind.NORTH:
-				return "opposite"
-			elif target_wind == Wind.EAST:
-				return "right"
-		elif self.wind == Wind.WEST:
-			if target_wind == Wind.NORTH:
-				return "left"
-			elif target_wind == Wind.EAST:
-				return "opposite"
-			elif target_wind == Wind.SOUTH:
-				return "right"
-		elif self.wind == Wind.NORTH:
-			if target_wind == Wind.EAST:
-				return "left"
-			elif target_wind == Wind.SOUTH:
-				return "opposite"
-			elif target_wind == Wind.WEST:
-				return "right"
-
-	def setRotatedText(self, widget: QLabel, text: str, degree: int):
-		if degree == 90 or degree == 270:
-			width = widget.size().height()
-			height = widget.size().width()
-			height = height // 2
-		else:
-			width = widget.size().width()
-			height = widget.size().height()
-			width = width // 2
-		pixmap = QPixmap(width, height)
-		pixmap.fill(Qt.GlobalColor.transparent)
-		painter = QPainter(pixmap)
-		painter.translate(pixmap.rect().center())
-		painter.rotate(degree)
-		font = QFont()
-		font.setPointSize(24)  # Set desired font size
-		painter.setFont(font)
-		painter.drawText(-width // 2, -height // 2, width, height, Qt.AlignmentFlag.AlignCenter, text)
-		painter.end()
-		widget.setPixmap(pixmap)
-		widget.update()
+			self.widgetUtils.setRotatedText(self.ui.selfFlowerCount, str(flowerCount), 0)
+		elif self.widgetUtils.windToSide(wind) == "left":
+			self.widgetUtils.setRotatedText(self.ui.leftFlowerCount, str(flowerCount), 90)
+		elif self.widgetUtils.windToSide(wind) == "opposite":
+			self.widgetUtils.setRotatedText(self.ui.oppositeFlowerCount, str(flowerCount), 180)
+		elif self.widgetUtils.windToSide(wind) == "right":
+			self.widgetUtils.setRotatedText(self.ui.rightFlowerCount, str(flowerCount), 270)
 
 	def setAllCards(self, cardTypes: list[CardType]):
 		for addedCard in self.addedCards:
@@ -242,97 +146,25 @@ class GameWindowHandler(QMainWindow):
 			addedCard.deleteLater()
 		self.addedCards.clear()
 		self.startAddCards(cardTypes)
-		self.resizeCardButtons()
-
-	def getCardButton(self, cardType: CardType):
-		if "CHARACTER" in cardType.name:
-			number = cardType.name.split("_")[1]
-			path = f"assets/character/{number}.png"
-		elif "DOT" in cardType.name:
-			number = cardType.name.split("_")[1]
-			path = f"assets/dot/{number}.png"
-		elif "BAMBOO" in cardType.name:
-			number = cardType.name.split("_")[1]
-			path = f"assets/bamboo/{number}.png"
-		elif "WIND" in cardType.name:
-			wind = cardType.name.split("_")[0].lower()
-			path = f"assets/wind/{wind}.png"
-		elif "DRAGON" in cardType.name:
-			dragon = cardType.name.split("_")[0].lower()
-			path = f"assets/dragon/{dragon}.png"
-		else:
-			path = f"assets/flower/flower.png"
-		pixmap = QPixmap(path)
-		scaled_pixmap = pixmap.scaled(600, 800)
-		icon = QIcon(scaled_pixmap)
-		newPushButton = QPushButton("")
-		# newPushButton.setObjectName(u"2")
-		sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
-		sizePolicy1.setHorizontalStretch(0)
-		sizePolicy1.setVerticalStretch(0)
-		sizePolicy1.setHeightForWidth(newPushButton.sizePolicy().hasHeightForWidth())
-		newPushButton.setSizePolicy(sizePolicy1)
-		newPushButton.setMinimumSize(QSize(1, 1))
-		newPushButton.setMaximumSize(QSize(16777215, 16777215))
-		# newPushButton.setMaximumSize(QSize(70, 100))
-		newPushButton.setBaseSize(QSize(0, 0))
-		font = QFont()
-		font.setPointSize(12)
-		font.setBold(False)
-		font.setStrikeOut(False)
-		font.setKerning(True)
-		newPushButton.setFont(font)
-		# newPushButton.setStyleSheet(f"padding: 0px;")
-		newPushButton.setCheckable(False)
-		newPushButton.setFlat(False)
-
-		newPushButton.setIcon(icon)
-		newPushButton.setIconSize(QSize(60, 80))
-
-		return newPushButton
 
 	def gotNewCard(self, cardType: CardType):
-		newPushButton = self.getCardButton(cardType)
+		newPushButton = self.widgetUtils.getCardButton(cardType)
 		# self.ui.selfCards.layout().addWidget(newPushButton)
 		self.ui.selfCards.layout().insertWidget(self.ui.selfCards.layout().count()-1, newPushButton)
 		self.addedCards.append(newPushButton)
-		self.resizeCardButtons()
+		self.updateCardButtons()
 
 	def startAddCards(self, cardTypes: list[CardType]):
 		for cardType in cardTypes:
-			newPushButton = self.getCardButton(cardType)
+			newPushButton = self.widgetUtils.getCardButton(cardType)
 			self.ui.selfCards.layout().insertWidget(self.ui.selfCards.layout().count()-2, newPushButton)
 			self.addedCards.append(newPushButton)
-		self.resizeCardButtons()
+		self.updateCardButtons()
 
 	def setPlayerWind(self, wind: Wind):
 		self.wind = wind
-		eastPixmap = QPixmap("assets/wind/east.png")
-		southPixmap = QPixmap("assets/wind/south.png")
-		westPixmap = QPixmap("assets/wind/west.png")
-		northPixmap = QPixmap("assets/wind/north.png")
-		match wind:
-			case Wind.EAST:
-				self.ui.selfWind.setPixmap(eastPixmap)
-				self.ui.leftWind.setPixmap(self.rotatePixmap(southPixmap, 90))
-				self.ui.opposideWind.setPixmap(self.rotatePixmap(westPixmap, 180))
-				self.ui.rightWind.setPixmap(self.rotatePixmap(northPixmap, 270))
-			case Wind.SOUTH:
-				self.ui.selfWind.setPixmap(southPixmap)
-				self.ui.leftWind.setPixmap(self.rotatePixmap(westPixmap, 90))
-				self.ui.opposideWind.setPixmap(self.rotatePixmap(northPixmap, 180))
-				self.ui.rightWind.setPixmap(self.rotatePixmap(eastPixmap, 270))
-			case Wind.WEST:
-				self.ui.selfWind.setPixmap(westPixmap)
-				self.ui.leftWind.setPixmap(self.rotatePixmap(northPixmap, 90))
-				self.ui.opposideWind.setPixmap(self.rotatePixmap(eastPixmap, 180))
-				self.ui.rightWind.setPixmap(self.rotatePixmap(southPixmap, 270))
-			case Wind.NORTH:
-				self.ui.selfWind.setPixmap(northPixmap)
-				self.ui.leftWind.setPixmap(self.rotatePixmap(eastPixmap, 90))
-				self.ui.opposideWind.setPixmap(self.rotatePixmap(southPixmap, 180))
-				self.ui.rightWind.setPixmap(self.rotatePixmap(westPixmap, 270))
-
-	def rotatePixmap(self, pixmap: QPixmap, degree: int):
-		transform = QTransform().rotate(degree)
-		return pixmap.transformed(transform)
+		playerWindPixmaps = self.widgetUtils.getPlayerWindPixmaps(wind)
+		self.ui.selfWind.setPixmap(playerWindPixmaps[0])
+		self.ui.leftWind.setPixmap(playerWindPixmaps[1])
+		self.ui.opposideWind.setPixmap(playerWindPixmaps[2])
+		self.ui.rightWind.setPixmap(playerWindPixmaps[3])

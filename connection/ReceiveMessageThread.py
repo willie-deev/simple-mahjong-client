@@ -69,7 +69,7 @@ class ReceiveMessageThread(threading.Thread):
 					cards.append(gameManager.gameHandler.getCardTypeByName(cardStr.decode()))
 				gameManager.removeFlowers()
 				gameManager.startAddCards(cards)
-			case ServerActionType.FLOWER_COUNT:
+			case ServerActionType.START_FLOWER_COUNT:
 				gameManager.sortAllCards()
 				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
 				flowerCount = int.from_bytes(receivedData[1])
@@ -78,6 +78,16 @@ class ReceiveMessageThread(threading.Thread):
 				gameManager.sortAllCards()
 				card = gameManager.gameHandler.getCardTypeByName(receivedData[0].decode())
 				gameManager.gotNewCard(card)
+			case ServerActionType.FLOWER_REPLACEMENT:
+				card = gameManager.gameHandler.getCardTypeByName(receivedData[0].decode())
+				gameManager.removeFlowers()
+				gameManager.gotNewCard(card)
+			case ServerActionType.FLOWER_COUNT:
+				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
+				flowerCount = int.from_bytes(receivedData[1])
+				gameManager.setFlowerCount(wind, flowerCount)
+			case ServerActionType.WAIT_DISCARD:
+				gameManager.waitDiscard()
 
 	def receiveEncryptedMessages(self) -> list[bytes]:
 		iv = self.receiveData(256)

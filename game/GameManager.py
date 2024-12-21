@@ -69,9 +69,13 @@ class GameManager:
 		self.gameWindowController.triggerSetAllCards(self.gotCards)
 
 	def sortAllCards(self):
-		self.gotCards.sort(key=lambda v: v.value, reverse=True)
+		self.gotCards.sort(key=lambda v: v.value, reverse=False)
 		self.gameWindowController.triggerSetAllCards(self.gotCards)
 
 	def gotNewCard(self, cardType: CardType):
 		self.gotCards.append(cardType)
 		self.gameWindowController.triggerGotNewCard(cardType)
+		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_CARDS, [])
+
+	def waitDiscard(self):
+		self.gameWindowController.triggerWaitDiscard()
