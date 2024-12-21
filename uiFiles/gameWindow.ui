@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1250</width>
-    <height>761</height>
+    <width>1321</width>
+    <height>816</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -38,7 +38,7 @@
         <height>16777215</height>
        </size>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,1">
+      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,0,0,1">
        <property name="spacing">
         <number>1</number>
        </property>
@@ -74,6 +74,9 @@
         </spacer>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="handCards"/>
+       </item>
+       <item>
         <spacer name="horizontalSpacer_4">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -88,6 +91,9 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="newCards"/>
        </item>
        <item>
         <spacer name="horizontalSpacer_5">
@@ -234,72 +240,13 @@
       <item row="1" column="1">
        <layout class="QGridLayout" name="gridLayout_5" rowstretch="2,3,2" columnstretch="2,3,2">
         <item row="1" column="0" rowspan="2">
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
-           <widget class="QPushButton" name="pushButton_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>PushButton</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <layout class="QGridLayout" name="leftDiscardedLayout"/>
         </item>
         <item row="0" column="0" colspan="2">
-         <layout class="QGridLayout" name="gridLayout_6">
-          <item row="1" column="0">
-           <widget class="QPushButton" name="pushButton_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>PushButton</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="2" column="1" colspan="2">
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="1" column="0">
-           <widget class="QPushButton" name="pushButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>PushButton</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <layout class="QGridLayout" name="oppositeDiscardedLayout"/>
         </item>
         <item row="0" column="2" rowspan="2">
-         <layout class="QGridLayout" name="gridLayout_7">
-          <item row="0" column="0">
-           <widget class="QPushButton" name="pushButton_4">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>PushButton</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <layout class="QGridLayout" name="rightDiscardedLayout"/>
         </item>
         <item row="1" column="1">
          <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1">
@@ -377,7 +324,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="opposideWind">
+                 <widget class="QLabel" name="oppositeWind">
                   <property name="text">
                    <string>TextLabel</string>
                   </property>
@@ -510,6 +457,17 @@
            </layout>
           </item>
          </layout>
+        </item>
+        <item row="2" column="1" colspan="2">
+         <widget class="QWidget" name="selfDiscardedWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <layout class="QGridLayout" name="selfDiscardedLayout" columnstretch="0"/>
+         </widget>
         </item>
        </layout>
       </item>

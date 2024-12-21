@@ -11,6 +11,7 @@ class GameWindowController(QObject):
 	gotNewCard = Signal(CardType)
 	waitDiscard = Signal()
 	setFlowerCount = Signal(Wind, int)
+	playerDiscarded = Signal(Wind, CardType)
 
 	def __init__(self, gameWindowHandler):
 		super().__init__()
@@ -33,3 +34,6 @@ class GameWindowController(QObject):
 
 	def triggerWaitDiscard(self):
 		self.waitDiscard.emit()
+
+	def triggerPlayerDiscarded(self, wind: Wind, cardType: CardType):
+		self.playerDiscarded.emit(wind, cardType)

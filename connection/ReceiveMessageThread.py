@@ -88,6 +88,13 @@ class ReceiveMessageThread(threading.Thread):
 				gameManager.setFlowerCount(wind, flowerCount)
 			case ServerActionType.WAIT_DISCARD:
 				gameManager.waitDiscard()
+			case ServerActionType.CLIENT_DISCARDED:
+				if gameManager.waitDiscardThread is not None and gameManager.waitDiscardThread.is_alive():
+					gameManager.waitDiscardEvent.set()
+				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
+				card = gameManager.gameHandler.getCardTypeByName(receivedData[1].decode())
+				gameManager.clientDiscarded(wind, card)
+
 
 	def receiveEncryptedMessages(self) -> list[bytes]:
 		iv = self.receiveData(256)

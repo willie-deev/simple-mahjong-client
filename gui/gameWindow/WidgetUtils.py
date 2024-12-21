@@ -11,24 +11,7 @@ class WidgetManager:
 		self.gameWindowHandler = gameWindowHandler
 
 	def getCardButton(self, cardType: CardType):
-		if "CHARACTER" in cardType.name:
-			number = cardType.name.split("_")[1]
-			path = f"assets/character/{number}.png"
-		elif "DOT" in cardType.name:
-			number = cardType.name.split("_")[1]
-			path = f"assets/dot/{number}.png"
-		elif "BAMBOO" in cardType.name:
-			number = cardType.name.split("_")[1]
-			path = f"assets/bamboo/{number}.png"
-		elif "WIND" in cardType.name:
-			wind = cardType.name.split("_")[0].lower()
-			path = f"assets/wind/{wind}.png"
-		elif "DRAGON" in cardType.name:
-			dragon = cardType.name.split("_")[0].lower()
-			path = f"assets/dragon/{dragon}.png"
-		else:
-			path = f"assets/flower/flower.png"
-		pixmap = QPixmap(path)
+		pixmap = QPixmap(self.getPathByCardType(cardType))
 		scaled_pixmap = pixmap.scaled(600, 800)
 		icon = QIcon(scaled_pixmap)
 		newPushButton = QPushButton("")
@@ -55,7 +38,29 @@ class WidgetManager:
 		newPushButton.setIcon(icon)
 		newPushButton.setIconSize(QSize(60, 80))
 
+		newPushButton.clicked.connect(lambda _: self.gameWindowHandler.discard(cardType))
+
 		return newPushButton
+
+	def getPathByCardType(self, cardType: CardType):
+		if "CHARACTER" in cardType.name:
+			number = cardType.name.split("_")[1]
+			path = f"assets/character/{number}.png"
+		elif "DOT" in cardType.name:
+			number = cardType.name.split("_")[1]
+			path = f"assets/dot/{number}.png"
+		elif "BAMBOO" in cardType.name:
+			number = cardType.name.split("_")[1]
+			path = f"assets/bamboo/{number}.png"
+		elif "WIND" in cardType.name:
+			wind = cardType.name.split("_")[0].lower()
+			path = f"assets/wind/{wind}.png"
+		elif "DRAGON" in cardType.name:
+			dragon = cardType.name.split("_")[0].lower()
+			path = f"assets/dragon/{dragon}.png"
+		else:
+			path = f"assets/flower/flower.png"
+		return path
 
 	def getPlayerWindPixmaps(self, wind: Wind):
 		windPixmaps = [

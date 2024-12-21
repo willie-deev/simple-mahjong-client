@@ -1,3 +1,4 @@
+import threading
 from typing import Optional
 
 from game.CardType import CardType
@@ -14,6 +15,9 @@ class GameManager:
 		self.selfWind = None
 		self.gotCards = list[CardType]()
 		self.orderNumberWindMap = None
+		self.waitDiscardEvent = threading.Event()
+		self.waitDiscardThread: Optional[threading.Thread] = None
+		self.discardedCardType = None
 
 		from connection.SendMessageUtils import SendMessageUtils
 		from gui.gameWindow.GameWindowController import GameWindowController
@@ -79,3 +83,23 @@ class GameManager:
 
 	def waitDiscard(self):
 		self.gameWindowController.triggerWaitDiscard()
+		self.waitDiscardThread = threading.Thread(target=self.waitDiscardThreadFunction)
+		self.waitDiscardThread.start()
+
+	def setDiscardType(self, discardType):
+		self.discardedCardType = discardType
+		self.waitDiscardEvent.set()
+
+	def waitDiscardThreadFunction(self):
+		self.waitDiscardEvent.wait()
+		self.waitDiscardEvent.clear()
+		self.gameHandler.main.guiHandler.gameWindowHandler.waitingForDiscard = False
+		if self.discardedCardType is not None:
+			self.sendMessageUtils.sendClientActionType(ClientActionType.DISCARD, [self.discardedCardType.name.encode()])
+
+	def clientDiscarded(self, wind: Wind, cardType: CardType):
+		if wind is self.selfWind:
+			self.gotCards.remove(cardType)
+			self.gameWindowController.triggerSetAllCards(self.gotCards)
+			self.sortAllCards()
+		self.gameWindowController.triggerPlayerDiscarded(wind, cardType)
