@@ -1,6 +1,8 @@
 import threading
 from typing import Optional
 
+from game import CardUtils
+from game.CardActionType import CardActionType
 from game.CardType import CardType
 from game.ClientActionType import ClientActionType
 from game.Wind import Wind
@@ -18,6 +20,7 @@ class GameManager:
 		self.waitDiscardEvent = threading.Event()
 		self.waitDiscardThread: Optional[threading.Thread] = None
 		self.discardedCardType = None
+		self.startAddCardCount = 0
 
 		from connection.SendMessageUtils import SendMessageUtils
 		from gui.gameWindow.GameWindowController import GameWindowController
@@ -26,16 +29,12 @@ class GameManager:
 
 	def setupVariables(self):
 		self.gameWindowController = self.gameHandler.main.guiHandler.gameWindowHandler.gameWindowController
+		self.cardUtils = self.gameHandler.cardUtils
 
 	def setSelfWind(self, selfWind: Wind):
 		self.selfWind = selfWind
 		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_CARDS, [])
 		debugOutput(selfWind)
-
-	def setFlowerCount(self, wind: Wind, flowerCount: int):
-		gameWindowController = self.gameWindowController
-		gameWindowController.triggerSetFlowerCount(wind, flowerCount)
-		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_FLOWER_COUNT, [])
 
 	def windToOrderNumber(self, wind: Wind):
 		if wind == Wind.EAST:
@@ -65,12 +64,10 @@ class GameManager:
 			self.gotCards.append(card)
 		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_CARDS, [])
 		self.gameWindowController.triggerStartAddCards(cards)
+		self.startAddCardCount += 1
+		if self.startAddCardCount == 4:
+			self.sortAllCards()
 		print(self.gotCards)
-
-	def removeFlowers(self):
-		while CardType.FLOWER in self.gotCards:
-			self.gotCards.remove(CardType.FLOWER)
-		self.gameWindowController.triggerSetAllCards(self.gotCards)
 
 	def sortAllCards(self):
 		self.gotCards.sort(key=lambda v: v.value, reverse=False)
@@ -96,6 +93,7 @@ class GameManager:
 		self.gameHandler.main.guiHandler.gameWindowHandler.waitingForDiscard = False
 		if self.discardedCardType is not None:
 			self.sendMessageUtils.sendClientActionType(ClientActionType.DISCARD, [self.discardedCardType.name.encode()])
+			self.discardedCardType = None
 
 	def clientDiscarded(self, wind: Wind, cardType: CardType):
 		if wind is self.selfWind:
@@ -103,3 +101,21 @@ class GameManager:
 			self.gameWindowController.triggerSetAllCards(self.gotCards)
 			self.sortAllCards()
 		self.gameWindowController.triggerPlayerDiscarded(wind, cardType)
+		canAction = False
+		canActionList = []
+		if cardType != CardType.FLOWER:
+			if self.gameHandler.windToSide(wind) == "right":
+				canChowList = self.cardUtils.calCanChowCards(cardType)
+				debugOutput("gotCards: " + str(self.gotCards))
+				debugOutput("canChowList: " + str(canChowList))
+				if canChowList is not None and len(canChowList) != 0:
+					canAction = True
+					canActionList.append(CardActionType.CHOW)
+		if canAction:
+			self.gameWindowController.triggerCanDoActions(canActionList)
+		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_DISCARD_ACTION, [canAction.to_bytes()])
+
+
+	def otherPlayerGotCard(self, wind: Wind):
+		self.gameWindowController.triggerOtherPlayerGotCard(wind)
+		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_OTHER_PLAYER_GOT_CARD, [])

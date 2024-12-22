@@ -34,10 +34,8 @@ class SendMessageUtils:
 
 	def sendEncryptByteList(self, message: list):
 		dataLength = self.encryptionUtils.encryptMessage(int.to_bytes(len(message)))
-		self.socket.sendall(dataLength[0])
-		self.socket.sendall(dataLength[1])
-
+		sendDatas: bytes = dataLength[0] + dataLength[1]
 		for data in message:
 			encryptedData = self.encryptionUtils.encryptMessage(data)
-			self.socket.sendall(encryptedData[0])
-			self.socket.sendall(encryptedData[1])
+			sendDatas += encryptedData[0] + encryptedData[1]
+		self.socket.sendall(sendDatas)

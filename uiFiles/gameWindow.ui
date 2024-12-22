@@ -38,7 +38,7 @@
         <height>16777215</height>
        </size>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,0,0,1">
+      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,0,0,1,0">
        <property name="spacing">
         <number>1</number>
        </property>
@@ -108,13 +108,33 @@
          </property>
         </spacer>
        </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_8" stretch="1,0">
+         <item>
+          <layout class="QHBoxLayout" name="selfActionedCardsLayout"/>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_9">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
     </item>
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,5" columnstretch="1,10,1">
       <item row="0" column="0" rowspan="2">
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0,0,0,1,0">
         <item>
          <spacer name="verticalSpacer_2">
           <property name="orientation">
@@ -129,17 +149,30 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>TextLabel</string>
+         <layout class="QVBoxLayout" name="leftCardsLayout">
+          <property name="spacing">
+           <number>1</number>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
+         </layout>
         </item>
         <item>
          <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="leftNewCardsLayout"/>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_10">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -151,10 +184,50 @@
           </property>
          </spacer>
         </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,1">
+          <item>
+           <spacer name="horizontalSpacer_10">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="leftActionedCardsLayout"/>
+          </item>
+         </layout>
+        </item>
        </layout>
       </item>
       <item row="0" column="2" rowspan="2">
-       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1,0,0,0,1">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="1,0">
+          <item>
+           <layout class="QVBoxLayout" name="rightActionedCardsLayout"/>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_12">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
         <item>
          <spacer name="verticalSpacer_4">
           <property name="orientation">
@@ -169,14 +242,27 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>TextLabel</string>
+         <layout class="QVBoxLayout" name="rightNewCardsLayout"/>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_12">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
           </property>
-         </widget>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="rightCardsLayout">
+          <property name="spacing">
+           <number>1</number>
+          </property>
+         </layout>
         </item>
         <item>
          <spacer name="verticalSpacer_3">
@@ -196,7 +282,27 @@
       <item row="0" column="1">
        <layout class="QVBoxLayout" name="verticalLayout" stretch="3">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,1,0,0,0,1">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_9" stretch="0,1">
+            <item>
+             <spacer name="verticalSpacer_11">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="oppositeActionedCardsLayout"/>
+            </item>
+           </layout>
+          </item>
           <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
@@ -211,14 +317,27 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>TextLabel</string>
+           <layout class="QHBoxLayout" name="oppositeNewCardsLayout"/>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_11">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
             </property>
-           </widget>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="oppositeCardsLayout">
+            <property name="spacing">
+             <number>1</number>
+            </property>
+           </layout>
           </item>
           <item>
            <spacer name="horizontalSpacer">
@@ -253,7 +372,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,4,1">
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_6" stretch="3,4,2,1">
+             <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0">
               <item>
                <spacer name="verticalSpacer_7">
                 <property name="orientation">
@@ -278,50 +397,36 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="leftFlowerIcon">
-                <property name="text">
-                 <string>e</string>
+               <spacer name="verticalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
                 </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="leftFlowerCount">
-                <property name="text">
-                 <string>0</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
+               </spacer>
               </item>
              </layout>
             </item>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_5">
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,2,4,3">
+               <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,0,0">
                 <item>
-                 <widget class="QLabel" name="oppositeFlowerCount">
-                  <property name="text">
-                   <string>0</string>
+                 <spacer name="horizontalSpacer_9">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
                   </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="oppositeFlowerIcon">
-                  <property name="text">
-                   <string>e</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
+                 </spacer>
                 </item>
                 <item>
                  <widget class="QLabel" name="oppositeWind">
@@ -359,7 +464,7 @@
                </widget>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,4,2,1">
+               <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0">
                 <item>
                  <spacer name="horizontalSpacer_7">
                   <property name="orientation">
@@ -384,50 +489,36 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="selfFlowerIcon">
-                  <property name="text">
-                   <string>e</string>
+                 <spacer name="horizontalSpacer_6">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
                   </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="selfFlowerCount">
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
+                 </spacer>
                 </item>
                </layout>
               </item>
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,2,4,3">
+             <layout class="QVBoxLayout" name="verticalLayout_7" stretch="0,0,0">
               <item>
-               <widget class="QLabel" name="rightFlowerCount">
-                <property name="text">
-                 <string>0</string>
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
                 </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="rightFlowerIcon">
-                <property name="text">
-                 <string>e</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
+               </spacer>
               </item>
               <item>
                <widget class="QLabel" name="rightWind">

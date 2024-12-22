@@ -65,6 +65,21 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer_5)
 
+        self.verticalLayout_8 = QVBoxLayout()
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.selfActionedCardsLayout = QHBoxLayout()
+        self.selfActionedCardsLayout.setObjectName(u"selfActionedCardsLayout")
+
+        self.verticalLayout_8.addLayout(self.selfActionedCardsLayout)
+
+        self.verticalSpacer_9 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout_8.addItem(self.verticalSpacer_9)
+
+        self.verticalLayout_8.setStretch(0, 1)
+
+        self.horizontalLayout_3.addLayout(self.verticalLayout_8)
+
         self.horizontalLayout_3.setStretch(0, 1)
         self.horizontalLayout_3.setStretch(4, 1)
 
@@ -78,35 +93,87 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addItem(self.verticalSpacer_2)
 
-        self.label_2 = QLabel(self.centralwidget)
-        self.label_2.setObjectName(u"label_2")
-        self.label_2.setAlignment(Qt.AlignCenter)
+        self.leftCardsLayout = QVBoxLayout()
+        self.leftCardsLayout.setSpacing(1)
+        self.leftCardsLayout.setObjectName(u"leftCardsLayout")
 
-        self.verticalLayout_3.addWidget(self.label_2)
+        self.verticalLayout_3.addLayout(self.leftCardsLayout)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout_3.addItem(self.verticalSpacer)
 
+        self.leftNewCardsLayout = QVBoxLayout()
+        self.leftNewCardsLayout.setObjectName(u"leftNewCardsLayout")
+
+        self.verticalLayout_3.addLayout(self.leftNewCardsLayout)
+
+        self.verticalSpacer_10 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout_3.addItem(self.verticalSpacer_10)
+
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalSpacer_10 = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_5.addItem(self.horizontalSpacer_10)
+
+        self.leftActionedCardsLayout = QVBoxLayout()
+        self.leftActionedCardsLayout.setObjectName(u"leftActionedCardsLayout")
+
+        self.horizontalLayout_5.addLayout(self.leftActionedCardsLayout)
+
+        self.horizontalLayout_5.setStretch(1, 1)
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_5)
+
+        self.verticalLayout_3.setStretch(0, 1)
+        self.verticalLayout_3.setStretch(4, 1)
 
         self.gridLayout_2.addLayout(self.verticalLayout_3, 0, 0, 2, 1)
 
         self.verticalLayout_4 = QVBoxLayout()
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.horizontalLayout_10 = QHBoxLayout()
+        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
+        self.rightActionedCardsLayout = QVBoxLayout()
+        self.rightActionedCardsLayout.setObjectName(u"rightActionedCardsLayout")
+
+        self.horizontalLayout_10.addLayout(self.rightActionedCardsLayout)
+
+        self.horizontalSpacer_12 = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_10.addItem(self.horizontalSpacer_12)
+
+        self.horizontalLayout_10.setStretch(0, 1)
+
+        self.verticalLayout_4.addLayout(self.horizontalLayout_10)
+
         self.verticalSpacer_4 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout_4.addItem(self.verticalSpacer_4)
 
-        self.label_3 = QLabel(self.centralwidget)
-        self.label_3.setObjectName(u"label_3")
-        self.label_3.setAlignment(Qt.AlignCenter)
+        self.rightNewCardsLayout = QVBoxLayout()
+        self.rightNewCardsLayout.setObjectName(u"rightNewCardsLayout")
 
-        self.verticalLayout_4.addWidget(self.label_3)
+        self.verticalLayout_4.addLayout(self.rightNewCardsLayout)
+
+        self.verticalSpacer_12 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout_4.addItem(self.verticalSpacer_12)
+
+        self.rightCardsLayout = QVBoxLayout()
+        self.rightCardsLayout.setSpacing(1)
+        self.rightCardsLayout.setObjectName(u"rightCardsLayout")
+
+        self.verticalLayout_4.addLayout(self.rightCardsLayout)
 
         self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout_4.addItem(self.verticalSpacer_3)
 
+        self.verticalLayout_4.setStretch(1, 1)
+        self.verticalLayout_4.setStretch(5, 1)
 
         self.gridLayout_2.addLayout(self.verticalLayout_4, 0, 2, 2, 1)
 
@@ -114,20 +181,46 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.verticalLayout_9 = QVBoxLayout()
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.verticalSpacer_11 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout_9.addItem(self.verticalSpacer_11)
+
+        self.oppositeActionedCardsLayout = QHBoxLayout()
+        self.oppositeActionedCardsLayout.setObjectName(u"oppositeActionedCardsLayout")
+
+        self.verticalLayout_9.addLayout(self.oppositeActionedCardsLayout)
+
+        self.verticalLayout_9.setStretch(1, 1)
+
+        self.horizontalLayout_4.addLayout(self.verticalLayout_9)
+
         self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_4.addItem(self.horizontalSpacer_2)
 
-        self.label_4 = QLabel(self.centralwidget)
-        self.label_4.setObjectName(u"label_4")
-        self.label_4.setAlignment(Qt.AlignCenter)
+        self.oppositeNewCardsLayout = QHBoxLayout()
+        self.oppositeNewCardsLayout.setObjectName(u"oppositeNewCardsLayout")
 
-        self.horizontalLayout_4.addWidget(self.label_4)
+        self.horizontalLayout_4.addLayout(self.oppositeNewCardsLayout)
+
+        self.horizontalSpacer_11 = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_11)
+
+        self.oppositeCardsLayout = QHBoxLayout()
+        self.oppositeCardsLayout.setSpacing(1)
+        self.oppositeCardsLayout.setObjectName(u"oppositeCardsLayout")
+
+        self.horizontalLayout_4.addLayout(self.oppositeCardsLayout)
 
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_4.addItem(self.horizontalSpacer)
 
+        self.horizontalLayout_4.setStretch(1, 1)
+        self.horizontalLayout_4.setStretch(5, 1)
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
 
@@ -168,22 +261,10 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_6.addWidget(self.leftWind)
 
-        self.leftFlowerIcon = QLabel(self.centralwidget)
-        self.leftFlowerIcon.setObjectName(u"leftFlowerIcon")
-        self.leftFlowerIcon.setAlignment(Qt.AlignCenter)
+        self.verticalSpacer_5 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout_6.addWidget(self.leftFlowerIcon)
+        self.verticalLayout_6.addItem(self.verticalSpacer_5)
 
-        self.leftFlowerCount = QLabel(self.centralwidget)
-        self.leftFlowerCount.setObjectName(u"leftFlowerCount")
-        self.leftFlowerCount.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_6.addWidget(self.leftFlowerCount)
-
-        self.verticalLayout_6.setStretch(0, 3)
-        self.verticalLayout_6.setStretch(1, 4)
-        self.verticalLayout_6.setStretch(2, 2)
-        self.verticalLayout_6.setStretch(3, 1)
 
         self.horizontalLayout.addLayout(self.verticalLayout_6)
 
@@ -191,17 +272,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.horizontalLayout_7 = QHBoxLayout()
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-        self.oppositeFlowerCount = QLabel(self.centralwidget)
-        self.oppositeFlowerCount.setObjectName(u"oppositeFlowerCount")
-        self.oppositeFlowerCount.setAlignment(Qt.AlignCenter)
+        self.horizontalSpacer_9 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        self.horizontalLayout_7.addWidget(self.oppositeFlowerCount)
-
-        self.oppositeFlowerIcon = QLabel(self.centralwidget)
-        self.oppositeFlowerIcon.setObjectName(u"oppositeFlowerIcon")
-        self.oppositeFlowerIcon.setAlignment(Qt.AlignCenter)
-
-        self.horizontalLayout_7.addWidget(self.oppositeFlowerIcon)
+        self.horizontalLayout_7.addItem(self.horizontalSpacer_9)
 
         self.oppositeWind = QLabel(self.centralwidget)
         self.oppositeWind.setObjectName(u"oppositeWind")
@@ -213,10 +286,6 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_7.addItem(self.horizontalSpacer_8)
 
-        self.horizontalLayout_7.setStretch(0, 1)
-        self.horizontalLayout_7.setStretch(1, 2)
-        self.horizontalLayout_7.setStretch(2, 4)
-        self.horizontalLayout_7.setStretch(3, 3)
 
         self.verticalLayout_5.addLayout(self.horizontalLayout_7)
 
@@ -238,22 +307,10 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addWidget(self.selfWind)
 
-        self.selfFlowerIcon = QLabel(self.centralwidget)
-        self.selfFlowerIcon.setObjectName(u"selfFlowerIcon")
-        self.selfFlowerIcon.setAlignment(Qt.AlignCenter)
+        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        self.horizontalLayout_2.addWidget(self.selfFlowerIcon)
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_6)
 
-        self.selfFlowerCount = QLabel(self.centralwidget)
-        self.selfFlowerCount.setObjectName(u"selfFlowerCount")
-        self.selfFlowerCount.setAlignment(Qt.AlignCenter)
-
-        self.horizontalLayout_2.addWidget(self.selfFlowerCount)
-
-        self.horizontalLayout_2.setStretch(0, 3)
-        self.horizontalLayout_2.setStretch(1, 4)
-        self.horizontalLayout_2.setStretch(2, 2)
-        self.horizontalLayout_2.setStretch(3, 1)
 
         self.verticalLayout_5.addLayout(self.horizontalLayout_2)
 
@@ -262,17 +319,9 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_7 = QVBoxLayout()
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.rightFlowerCount = QLabel(self.centralwidget)
-        self.rightFlowerCount.setObjectName(u"rightFlowerCount")
-        self.rightFlowerCount.setAlignment(Qt.AlignCenter)
+        self.verticalSpacer_6 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout_7.addWidget(self.rightFlowerCount)
-
-        self.rightFlowerIcon = QLabel(self.centralwidget)
-        self.rightFlowerIcon.setObjectName(u"rightFlowerIcon")
-        self.rightFlowerIcon.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_7.addWidget(self.rightFlowerIcon)
+        self.verticalLayout_7.addItem(self.verticalSpacer_6)
 
         self.rightWind = QLabel(self.centralwidget)
         self.rightWind.setObjectName(u"rightWind")
@@ -284,10 +333,6 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_7.addItem(self.verticalSpacer_8)
 
-        self.verticalLayout_7.setStretch(0, 1)
-        self.verticalLayout_7.setStretch(1, 2)
-        self.verticalLayout_7.setStretch(2, 4)
-        self.verticalLayout_7.setStretch(3, 3)
 
         self.horizontalLayout.addLayout(self.verticalLayout_7)
 
@@ -338,21 +383,10 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.leftWind.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.leftFlowerIcon.setText(QCoreApplication.translate("MainWindow", u"e", None))
-        self.leftFlowerCount.setText(QCoreApplication.translate("MainWindow", u"0", None))
-        self.oppositeFlowerCount.setText(QCoreApplication.translate("MainWindow", u"0", None))
-        self.oppositeFlowerIcon.setText(QCoreApplication.translate("MainWindow", u"e", None))
         self.oppositeWind.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.selfWind.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.selfFlowerIcon.setText(QCoreApplication.translate("MainWindow", u"e", None))
-        self.selfFlowerCount.setText(QCoreApplication.translate("MainWindow", u"0", None))
-        self.rightFlowerCount.setText(QCoreApplication.translate("MainWindow", u"0", None))
-        self.rightFlowerIcon.setText(QCoreApplication.translate("MainWindow", u"e", None))
         self.rightWind.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
     # retranslateUi
 

@@ -14,7 +14,7 @@ class WidgetManager:
 		pixmap = QPixmap(self.getPathByCardType(cardType))
 		scaled_pixmap = pixmap.scaled(600, 800)
 		icon = QIcon(scaled_pixmap)
-		newPushButton = QPushButton("")
+		newPushButton = QPushButton()
 		# newPushButton.setObjectName(u"2")
 		sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 		sizePolicy1.setHorizontalStretch(0)
@@ -41,6 +41,22 @@ class WidgetManager:
 		newPushButton.clicked.connect(lambda _: self.gameWindowHandler.discard(cardType))
 
 		return newPushButton
+
+	def getHideCardLabel(self):
+		newLabel = QLabel()
+		sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+		# sizePolicy1.setHorizontalStretch(0)
+		# sizePolicy1.setVerticalStretch(0)
+		# sizePolicy1.setHeightForWidth(newLabel.sizePolicy().hasHeightForWidth())
+		# sizePolicy1.setWidthForHeight(True)
+		newLabel.setSizePolicy(sizePolicy1)
+		# newLabel.setMinimumSize(QSize(1, 1))
+		newLabel.setMaximumSize(QSize(16777215, 16777215))
+		# newLabel.setBaseSize(QSize(0, 0))
+
+		newLabel.setStyleSheet("background-color: gray; border-radius: 5px;")
+
+		return newLabel
 
 	def getPathByCardType(self, cardType: CardType):
 		if "CHARACTER" in cardType.name:
@@ -101,66 +117,6 @@ class WidgetManager:
 	def rotatePixmap(self, pixmap: QPixmap, degree: int):
 		transform = QTransform().rotate(degree)
 		return pixmap.transformed(transform)
-	
-	def sideToWind(self, side: str) -> Wind:
-		if self.gameWindowHandler.wind == Wind.EAST:
-			if side == "left":
-				return Wind.SOUTH
-			elif side == "opposite":
-				return Wind.WEST
-			elif side == "right":
-				return Wind.NORTH
-		elif self.gameWindowHandler.wind == Wind.SOUTH:
-			if side == "left":
-				return Wind.WEST
-			elif side == "opposite":
-				return Wind.NORTH
-			elif side == "right":
-				return Wind.EAST
-		elif self.gameWindowHandler.wind == Wind.WEST:
-			if side == "left":
-				return Wind.NORTH
-			elif side == "opposite":
-				return Wind.EAST
-			elif side == "right":
-				return Wind.SOUTH
-		elif self.gameWindowHandler.wind == Wind.NORTH:
-			if side == "left":
-				return Wind.EAST
-			elif side == "opposite":
-				return Wind.SOUTH
-			elif side == "right":
-				return Wind.WEST
-
-	def windToSide(self, target_wind: Wind) -> str:
-		if self.gameWindowHandler.wind == Wind.EAST:
-			if target_wind == Wind.SOUTH:
-				return "left"
-			elif target_wind == Wind.WEST:
-				return "opposite"
-			elif target_wind == Wind.NORTH:
-				return "right"
-		elif self.gameWindowHandler.wind == Wind.SOUTH:
-			if target_wind == Wind.WEST:
-				return "left"
-			elif target_wind == Wind.NORTH:
-				return "opposite"
-			elif target_wind == Wind.EAST:
-				return "right"
-		elif self.gameWindowHandler.wind == Wind.WEST:
-			if target_wind == Wind.NORTH:
-				return "left"
-			elif target_wind == Wind.EAST:
-				return "opposite"
-			elif target_wind == Wind.SOUTH:
-				return "right"
-		elif self.gameWindowHandler.wind == Wind.NORTH:
-			if target_wind == Wind.EAST:
-				return "left"
-			elif target_wind == Wind.SOUTH:
-				return "opposite"
-			elif target_wind == Wind.WEST:
-				return "right"
 
 	def setRotatedText(self, widget: QLabel, text: str, degree: int):
 		if degree == 90 or degree == 270:
@@ -201,16 +157,4 @@ class WidgetManager:
 		    		}
 		    	""")
 		return button
-
-	def setupFlowerIcons(self):
-		flowerPixmap = QPixmap("assets/flower/flower.png").scaledToHeight(48)
-		self.gameWindowHandler.ui.selfFlowerIcon.setPixmap(flowerPixmap)
-		self.gameWindowHandler.ui.leftFlowerIcon.setPixmap(self.rotatePixmap(flowerPixmap, 90))
-		self.gameWindowHandler.ui.oppositeFlowerIcon.setPixmap(self.rotatePixmap(flowerPixmap, 180))
-		self.gameWindowHandler.ui.rightFlowerIcon.setPixmap(self.rotatePixmap(flowerPixmap, 270))
-
-		self.setRotatedText(self.gameWindowHandler.ui.selfFlowerCount, "0", 0)
-		self.setRotatedText(self.gameWindowHandler.ui.leftFlowerCount, "0", 90)
-		self.setRotatedText(self.gameWindowHandler.ui.oppositeFlowerCount, "0", 180)
-		self.setRotatedText(self.gameWindowHandler.ui.rightFlowerCount, "0", 270)
 

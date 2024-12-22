@@ -67,34 +67,25 @@ class ReceiveMessageThread(threading.Thread):
 				cards = list[CardType]()
 				for cardStr in cardsStrs:
 					cards.append(gameManager.gameHandler.getCardTypeByName(cardStr.decode()))
-				gameManager.removeFlowers()
 				gameManager.startAddCards(cards)
-			case ServerActionType.START_FLOWER_COUNT:
-				gameManager.sortAllCards()
-				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
-				flowerCount = int.from_bytes(receivedData[1])
-				gameManager.setFlowerCount(wind, flowerCount)
 			case ServerActionType.SEND_CARD:
 				gameManager.sortAllCards()
 				card = gameManager.gameHandler.getCardTypeByName(receivedData[0].decode())
 				gameManager.gotNewCard(card)
 			case ServerActionType.FLOWER_REPLACEMENT:
 				card = gameManager.gameHandler.getCardTypeByName(receivedData[0].decode())
-				gameManager.removeFlowers()
 				gameManager.gotNewCard(card)
-			case ServerActionType.FLOWER_COUNT:
-				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
-				flowerCount = int.from_bytes(receivedData[1])
-				gameManager.setFlowerCount(wind, flowerCount)
 			case ServerActionType.WAIT_DISCARD:
 				gameManager.waitDiscard()
 			case ServerActionType.CLIENT_DISCARDED:
-				if gameManager.waitDiscardThread is not None and gameManager.waitDiscardThread.is_alive():
-					gameManager.waitDiscardEvent.set()
 				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
 				card = gameManager.gameHandler.getCardTypeByName(receivedData[1].decode())
+				if card != CardType.FLOWER and gameManager.waitDiscardThread is not None and gameManager.waitDiscardThread.is_alive():
+					gameManager.waitDiscardEvent.set()
 				gameManager.clientDiscarded(wind, card)
-
+			case ServerActionType.OTHER_PLAYER_GOT_CARD:
+				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
+				gameManager.otherPlayerGotCard(wind)
 
 	def receiveEncryptedMessages(self) -> list[bytes]:
 		iv = self.receiveData(256)
