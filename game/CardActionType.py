@@ -2,8 +2,9 @@ from enum import Enum
 
 
 class CardActionType(Enum):
-	CHOW = 0,
-	PUNG = 1,
-	KONG = 2,
-	READY = 3,
-	WIN = 4
+	NOTHING = 0
+	CHOW = 1,
+	PUNG = 2,
+	KONG = 3,
+	READY = 4,
+	WIN = 5

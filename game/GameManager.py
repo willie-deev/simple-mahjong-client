@@ -1,7 +1,6 @@
 import threading
-from typing import Optional
+from threading import Thread
 
-from game import CardUtils
 from game.CardActionType import CardActionType
 from game.CardType import CardType
 from game.ClientActionType import ClientActionType
@@ -18,14 +17,17 @@ class GameManager:
 		self.gotCards = list[CardType]()
 		self.orderNumberWindMap = None
 		self.waitDiscardEvent = threading.Event()
-		self.waitDiscardThread: Optional[threading.Thread] = None
+		self.waitDiscardThread: Thread | None = None
+		self.waitCardActionThread: Thread | None = None
 		self.discardedCardType = None
 		self.startAddCardCount = 0
+		self.canAction: bool | None = None
+		self.cardActionCardsDict: dict[CardActionType, list] = {}
 
 		from connection.SendMessageUtils import SendMessageUtils
 		from gui.gameWindow.GameWindowController import GameWindowController
 		self.sendMessageUtils: SendMessageUtils = gameHandler.main.connectionHandler.sendMessageUtils
-		self.gameWindowController: Optional[GameWindowController] = None
+		self.gameWindowController: GameWindowController | None = None
 
 	def setupVariables(self):
 		self.gameWindowController = self.gameHandler.main.guiHandler.gameWindowHandler.gameWindowController
@@ -101,20 +103,26 @@ class GameManager:
 			self.gameWindowController.triggerSetAllCards(self.gotCards)
 			self.sortAllCards()
 		self.gameWindowController.triggerPlayerDiscarded(wind, cardType)
-		canAction = False
-		canActionList = []
+		self.canAction = False
+		self.cardActionCardsDict = {}
 		if cardType != CardType.FLOWER:
 			if self.gameHandler.windToSide(wind) == "right":
 				canChowList = self.cardUtils.calCanChowCards(cardType)
 				debugOutput("gotCards: " + str(self.gotCards))
 				debugOutput("canChowList: " + str(canChowList))
 				if canChowList is not None and len(canChowList) != 0:
-					canAction = True
-					canActionList.append(CardActionType.CHOW)
-		if canAction:
-			self.gameWindowController.triggerCanDoActions(canActionList)
-		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_DISCARD_ACTION, [canAction.to_bytes()])
+					self.canAction = True
+					self.cardActionCardsDict[CardActionType.CHOW] = canChowList
+		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_DISCARD_ACTION, [self.canAction.to_bytes()])
 
+	def waitCardAction(self):
+		if self.canAction:
+			self.waitCardActionThread = threading.Thread(target=self.waitCardActionThreadFunction)
+			self.waitCardActionThread.run()
+
+	def waitCardActionThreadFunction(self):
+		cardActionCardsDict = self.cardActionCardsDict.copy()
+		self.gameWindowController.triggerCanDoActions(cardActionCardsDict)
 
 	def otherPlayerGotCard(self, wind: Wind):
 		self.gameWindowController.triggerOtherPlayerGotCard(wind)

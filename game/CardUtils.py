@@ -13,7 +13,6 @@ class CardUtils:
 			return None
 		sameTypeCards, sameTypeCardNumbers = self.getSameTypeCards(cardType)
 		sameTypeCardNumbers += [getNumberByCardType(cardType)]
-		cardTypeNameWithoutNumber = getCardTypeWithoutNumber(cardType)
 		canChowList = []
 		for needCards in getCardsNeededToChow(cardType):
 			haveAllCards = True

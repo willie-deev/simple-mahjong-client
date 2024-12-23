@@ -1,8 +1,8 @@
 from PySide6.QtCore import QObject, Signal
 
-from game.CardActionType import CardActionType
 from game.CardType import CardType
 from game.Wind import Wind
+from utils.debugUtils import debugOutput
 
 
 class GameWindowController(QObject):
@@ -13,7 +13,7 @@ class GameWindowController(QObject):
 	waitDiscard = Signal()
 	playerDiscarded = Signal(Wind, CardType)
 	otherPlayerGotCard = Signal(Wind)
-	canDoActions = Signal(list)
+	canDoActions = Signal(object)
 
 	def __init__(self, gameWindowHandler):
 		super().__init__()
@@ -40,5 +40,5 @@ class GameWindowController(QObject):
 	def triggerOtherPlayerGotCard(self, wind: Wind):
 		self.otherPlayerGotCard.emit(wind)
 
-	def triggerCanDoActions(self, canDoActions: list[CardActionType]):
+	def triggerCanDoActions(self, canDoActions: dict):
 		self.canDoActions.emit(canDoActions)

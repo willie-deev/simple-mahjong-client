@@ -1,12 +1,10 @@
-from typing import Optional
-
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QPushButton
 
-from game.CardActionType import CardActionType
 from game.CardType import CardType
 from game.Wind import Wind
+from gui.gameWindow.ActionsMenuManager import ActionsMenuManager
 from gui.gameWindow.GameWindowController import GameWindowController
 from gui.gameWindow.WidgetUtils import WidgetManager
 from gui.gameWindow.gameWindow import *
@@ -16,12 +14,11 @@ from utils.debugUtils import debugOutput
 class GameWindowHandler(QMainWindow):
 	def __init__(self, guiHandler):
 		super().__init__()
-		self.overlay: Optional[QWidget] = None
 		self.ui = Ui_MainWindow()
 		self.guiHandler = guiHandler
 		self.gameWindowController = GameWindowController(self)
 		self.widgetUtils = WidgetManager(self)
-		self.addedCards = list[QPushButton]()
+		self.addedCards: dict[QPushButton, CardType] = {}
 		self.waitingForDiscard = False
 		self.selfDiscardedLabels: dict[QLabel, CardType] = {}
 		self.leftDiscardedLabels: dict[QLabel, CardType] = {}
@@ -41,9 +38,11 @@ class GameWindowHandler(QMainWindow):
 		self.oppositeGotCardLabel = None
 		self.rightGotCardLabel = None
 
+		self.actionsMenuManager = ActionsMenuManager(self)
+
 	def resizeEvent(self, event):
 		super().resizeEvent(event)
-		self.resizeOverlay()
+		self.actionsMenuManager.resizeOverlay()
 		self.updateCardButtons()
 		self.resizeDiscardedLabels()
 		self.resizeOtherPlayerCards()
@@ -54,7 +53,7 @@ class GameWindowHandler(QMainWindow):
 
 	def changeEvent(self, event):
 		super().changeEvent(event)
-		self.resizeOverlay()
+		self.actionsMenuManager.resizeOverlay()
 		self.updateCardButtons()
 		self.resizeDiscardedLabels()
 		QTimer.singleShot(1, self.updateCardButtons)
@@ -73,10 +72,10 @@ class GameWindowHandler(QMainWindow):
 		self.gameWindowController.waitDiscard.connect(self.waitDiscard)
 		self.gameWindowController.playerDiscarded.connect(self.playerDiscarded)
 		self.gameWindowController.otherPlayerGotCard.connect(self.otherPlayerGotCard)
-		self.gameWindowController.canDoActions.connect(self.showActionsMenu)
+		self.gameWindowController.canDoActions.connect(self.actionsMenuManager.showActionsMenu)
 
-		self.setupActionsMenu()
-		self.hideActionsMenu()
+		self.actionsMenuManager.setupActionsMenu()
+		self.actionsMenuManager.hideActionsMenu()
 
 		self.setupDiscardArea()
 		self.setupOtherPlayerLabel()
@@ -342,7 +341,7 @@ class GameWindowHandler(QMainWindow):
 		self.updateCardButtons()
 
 	def updateCardButtons(self):
-		for card in self.addedCards:
+		for card in self.addedCards.keys():
 			height = self.ui.selfCards.height() // 4 * 3
 			width = height // 3 * 2
 			padding = width // 7
@@ -358,64 +357,8 @@ class GameWindowHandler(QMainWindow):
 				styleSheet += "QPushButton:hover { background-color: lightgray; }"
 			card.setStyleSheet(styleSheet)
 
-	def resizeOverlay(self):
-		if self.overlay is not None and not self.overlay.isHidden():
-			maxWidth = self.overlay.maximumWidth()
-			maxHeight = self.overlay.maximumHeight()
-			width = self.rect().width()//2
-			height = self.rect().height()//6
-			exceedWidth = 0
-			exceedHeight = 0
-			if width > maxWidth:
-				exceedWidth = width - maxWidth
-				width =  maxWidth
-			if height > maxHeight:
-				exceedHeight = height - maxHeight
-				height = maxHeight
-			posX = int(self.rect().width()//4 + exceedWidth//2)
-			posY = int(self.rect().height() - self.ui.selfCards.height() - height + exceedHeight//2)
-			self.overlay.setGeometry(posX, posY, width, height)
-
-	def showActionsMenu(self, canDoActions: list[CardActionType]):
-		self.overlay.show()
-
-	def hideActionsMenu(self):
-		self.overlay.hide()
-
-	def setupActionsMenu(self):
-		self.overlay = QWidget(self)
-		# self.overlay.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-		self.overlay.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-		self.overlay.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-		self.overlay.setMaximumSize(QSize(600, 100))
-		self.overlay.setStyleSheet("background: rgba(0, 0, 0, 50);")
-
-		self.resizeOverlay()
-
-		chowButton = self.widgetUtils.getActionButton("chow", "Chow")
-		pungButton = self.widgetUtils.getActionButton("pung", "Pung")
-		kongButton = self.widgetUtils.getActionButton("kong", "Kong")
-		readyButton = self.widgetUtils.getActionButton("ready", "Ready")
-		winButton = self.widgetUtils.getActionButton("win", "Win")
-
-		expandingLabel = QWidget(self.overlay)
-		expandingLabel.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-
-		layout = QHBoxLayout(self.overlay)
-		layout.setContentsMargins(0, 0, 0, 0)
-		layout.addWidget(expandingLabel)
-
-		layout2 = QHBoxLayout(expandingLabel)
-		layout2.setContentsMargins(20, 20, 20, 20)
-		layout2.setSpacing(20)
-		layout2.addWidget(chowButton)
-		layout2.addWidget(pungButton)
-		layout2.addWidget(kongButton)
-		layout2.addWidget(readyButton)
-		layout2.addWidget(winButton)
-
 	def setAllCards(self, cardTypes: list[CardType]):
-		for addedCard in self.addedCards:
+		for addedCard in self.addedCards.keys():
 			# self.ui.selfCards.layout().removeWidget(addedCard)
 			addedCard.deleteLater()
 		self.addedCards.clear()
@@ -426,14 +369,14 @@ class GameWindowHandler(QMainWindow):
 		# self.ui.selfCards.layout().addWidget(newPushButton)
 		# debugOutput(str(len(self.addedCards)))
 		self.ui.newCards.layout().addWidget(newPushButton)
-		self.addedCards.append(newPushButton)
+		self.addedCards[newPushButton] = cardType
 		self.updateCardButtons()
 
 	def startAddCards(self, cardTypes: list[CardType]):
 		for cardType in cardTypes:
 			newPushButton = self.widgetUtils.getCardButton(cardType)
 			self.ui.handCards.layout().addWidget(newPushButton)
-			self.addedCards.append(newPushButton)
+			self.addedCards[newPushButton] = cardType
 		self.updateCardButtons()
 
 	def setPlayerWind(self, wind: Wind):

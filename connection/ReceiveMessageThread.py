@@ -86,6 +86,8 @@ class ReceiveMessageThread(threading.Thread):
 			case ServerActionType.OTHER_PLAYER_GOT_CARD:
 				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
 				gameManager.otherPlayerGotCard(wind)
+			case ServerActionType.WAIT_CARD_ACTION:
+				gameManager.waitCardAction()
 
 	def receiveEncryptedMessages(self) -> list[bytes]:
 		iv = self.receiveData(256)
