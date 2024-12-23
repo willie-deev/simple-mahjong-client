@@ -23,6 +23,9 @@ class ActionsMenuManager:
 		self.cancelButton: QPushButton | None = None
 
 		self.cardActionCardsDict: dict[CardActionType, list] = {}
+		self.selectingChowCard = False
+		self.canChowCardTypes: list[CardType] | None = None
+		self.selectedChowCardTypes: list[CardType] = []
 
 	def resizeOverlay(self):
 		if self.overlay is not None and not self.overlay.isHidden():
@@ -59,12 +62,61 @@ class ActionsMenuManager:
 		self.resizeOverlay()
 
 	def clickedChowButton(self):
-		canChowCardTypes = []
-		for cardTypes in self.cardActionCardsDict[CardActionType.CHOW]:
-			canChowCardTypes += cardTypes
-		for selfCardButton, cardType in self.gameWindowHandler.addedCards.items():
-			if cardType not in canChowCardTypes:
-				selfCardButton.setStyleSheet("background-color:red")
+		if self.selectingChowCard is False:
+			self.selectingChowCard = True
+			self.chowButton.setStyleSheet("""
+						QPushButton {
+			        		background-color: rgba(50, 50, 50, 200);
+			        		border-radius: 10px;
+			    		}
+			""")
+			self.canChowCardTypes = []
+			for cardTypes in self.cardActionCardsDict[CardActionType.CHOW]:
+				self.canChowCardTypes += cardTypes
+			styleSheet = self.gameWindowHandler.getCardButtonVariables()[0]
+			for selfCardButton, cardType in self.gameWindowHandler.addedCards.items():
+				if cardType in self.canChowCardTypes:
+					selfCardButton.setStyleSheet(styleSheet + "QPushButton:hover { background-color: lightgray; }")
+				else:
+					selfCardButton.setStyleSheet(styleSheet.replace("background-color: white;", "background-color: rgb(35, 35, 35);"))
+		else:
+			self.cancelSelectingChowCard()
+
+	def cancelCardAction(self):
+		self.cancelSelectingChowCard()
+		self.hideActionsMenu()
+		gameManager = self.gameWindowHandler.guiHandler.main.gameHandler.gameManager
+		gameManager.cancelCardAction()
+
+	def selectedChowCard(self, cardType: CardType, clickedButton: QPushButton):
+		if cardType in self.canChowCardTypes:
+			self.selectedChowCardTypes.append(cardType)
+			if len(self.selectedChowCardTypes) <= 1:
+				styleSheet = self.gameWindowHandler.getCardButtonVariables()[0]
+				clickedButton.setStyleSheet(styleSheet.replace("background-color: white;", "background-color: lightgray;"))
+			elif len(self.selectedChowCardTypes) == 2:
+				self.selectedChowCardTypes.sort(key=lambda v: v.value)
+				if self.selectedChowCardTypes in self.cardActionCardsDict[CardActionType.CHOW]:
+					debugOutput("self.selectedChowCardTypes: " + str(self.selectedChowCardTypes))
+					gameManager = self.gameWindowHandler.guiHandler.main.gameHandler.gameManager
+					gameManager.performChowCardAction(self.selectedChowCardTypes)
+					self.cancelCardAction()
+				else:
+					self.cancelSelectingChowCard()
+
+	def cancelSelectingChowCard(self):
+		self.selectedChowCardTypes = []
+		self.chowButton.setStyleSheet("""
+								QPushButton {
+				        			background-color: rgba(0, 0, 0, 100);
+				        			border-radius: 10px;
+				    			}
+				    			QPushButton:hover {
+				       				background-color: rgba(0, 0, 0, 200);
+				    			}
+				    		""")
+		self.selectingChowCard = False
+		self.gameWindowHandler.updateCardButtons()
 
 	def mouseLeaveButton(self):
 		self.gameWindowHandler.updateCardButtons()
@@ -114,3 +166,4 @@ class ActionsMenuManager:
 		layout2.addWidget(self.cancelButton)
 
 		self.chowButton.clicked.connect(self.clickedChowButton)
+		self.cancelButton.clicked.connect(self.cancelCardAction)

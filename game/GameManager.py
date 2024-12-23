@@ -116,14 +116,35 @@ class GameManager:
 		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_DISCARD_ACTION, [self.canAction.to_bytes()])
 
 	def waitCardAction(self):
-		if self.canAction:
+		if self.canAction is True:
 			self.waitCardActionThread = threading.Thread(target=self.waitCardActionThreadFunction)
 			self.waitCardActionThread.run()
+		else:
+			self.cancelCardAction()
 
 	def waitCardActionThreadFunction(self):
 		cardActionCardsDict = self.cardActionCardsDict.copy()
 		self.gameWindowController.triggerCanDoActions(cardActionCardsDict)
 
+	def cancelCardAction(self):
+		self.canAction = False
+		self.sendMessageUtils.sendClientActionType(ClientActionType.PERFORM_CARD_ACTION, [])
+
+	def performChowCardAction(self, cardTypes: list[CardType]):
+		sendByteList = [CardActionType.CHOW.name.encode()]
+		for card in cardTypes:
+			sendByteList.append(card.name.encode())
+		self.sendMessageUtils.sendClientActionType(ClientActionType.PERFORM_CARD_ACTION, sendByteList)
+		self.canAction = False
+
 	def otherPlayerGotCard(self, wind: Wind):
 		self.gameWindowController.triggerOtherPlayerGotCard(wind)
 		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_OTHER_PLAYER_GOT_CARD, [])
+
+	def clientPerformedCardAction(self, performedWind: Wind, cardActionType: CardActionType, cardTypes: list[CardType]):
+		if performedWind == self.selfWind:
+			if cardActionType == CardActionType.CHOW:
+				self.gotCards.remove(cardTypes[0])
+				self.gotCards.remove(cardTypes[2])
+			self.sortAllCards()
+		self.gameWindowController.triggerPerformedCardAction(performedWind, cardTypes)

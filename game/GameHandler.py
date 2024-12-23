@@ -1,3 +1,4 @@
+from game.CardActionType import CardActionType
 from game.CardType import CardType
 from game.CardUtils import CardUtils
 from game.GameManager import GameManager
@@ -22,16 +23,6 @@ class GameHandler:
 					self.cardNumberTypeList.append(cardType)
 		for i in range(len(self.cardNumberTypeList)):
 			debugOutput(str(i) + "\t" + str(self.cardNumberTypeList[i]))
-
-	def getWindByName(self, name):
-		for wind in Wind:
-			if wind.name == name:
-				return wind
-
-	def getCardTypeByName(self, name):
-		for card in CardType:
-			if card.name == name:
-				return card
 
 	def getCardTypeByNumber(self, number: int):
 		return self.cardNumberTypeList[number]
@@ -67,3 +58,18 @@ class GameHandler:
 				return "opposite"
 			elif target_wind == Wind.WEST:
 				return "right"
+
+def getWindByName(name):
+	for wind in Wind:
+		if wind.name == name:
+			return wind
+
+def getCardTypeByName(name):
+	for card in CardType:
+		if card.name == name:
+			return card
+
+def getCardActionTypeByName(name):
+	for cardActionType in CardActionType:
+		if cardActionType.name == name:
+			return cardActionType

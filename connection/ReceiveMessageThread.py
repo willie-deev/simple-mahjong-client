@@ -1,6 +1,7 @@
 import threading
 
 from game.CardType import CardType
+from game.GameHandler import GameHandler
 from game.ServerActionType import ServerActionType
 from utils.debugUtils import debugOutput
 
@@ -50,9 +51,10 @@ class ReceiveMessageThread(threading.Thread):
 		receivedData = receivedData[1:]
 		gameManager = self.connectionHandler.main.gameHandler.gameManager
 		gameWindowController = self.connectionHandler.main.guiHandler.gameWindowHandler.gameWindowController
+		from game import GameHandler
 		match serverActionType:
 			case ServerActionType.CHANGE_WIND:
-				selfWind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
+				selfWind = GameHandler.getWindByName(receivedData[0].decode())
 				gameWindowController.triggerSetPlayerWind(selfWind)
 				gameManager.setupVariables()
 				gameManager.setSelfWind(selfWind)
@@ -60,34 +62,43 @@ class ReceiveMessageThread(threading.Thread):
 				cardsStrs = receivedData
 				cards = list[CardType]()
 				for cardStr in cardsStrs:
-					cards.append(gameManager.gameHandler.getCardTypeByName(cardStr.decode()))
+					cards.append(GameHandler.getCardTypeByName(cardStr.decode()))
 				gameManager.startAddCards(cards)
 			case ServerActionType.START_FLOWER_REPLACEMENT:
 				cardsStrs = receivedData
 				cards = list[CardType]()
 				for cardStr in cardsStrs:
-					cards.append(gameManager.gameHandler.getCardTypeByName(cardStr.decode()))
+					cards.append(GameHandler.getCardTypeByName(cardStr.decode()))
 				gameManager.startAddCards(cards)
 			case ServerActionType.SEND_CARD:
 				gameManager.sortAllCards()
-				card = gameManager.gameHandler.getCardTypeByName(receivedData[0].decode())
+				card = GameHandler.getCardTypeByName(receivedData[0].decode())
 				gameManager.gotNewCard(card)
 			case ServerActionType.FLOWER_REPLACEMENT:
-				card = gameManager.gameHandler.getCardTypeByName(receivedData[0].decode())
+				card = GameHandler.getCardTypeByName(receivedData[0].decode())
 				gameManager.gotNewCard(card)
 			case ServerActionType.WAIT_DISCARD:
 				gameManager.waitDiscard()
 			case ServerActionType.CLIENT_DISCARDED:
-				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
-				card = gameManager.gameHandler.getCardTypeByName(receivedData[1].decode())
+				wind = GameHandler.getWindByName(receivedData[0].decode())
+				card = GameHandler.getCardTypeByName(receivedData[1].decode())
 				if card != CardType.FLOWER and gameManager.waitDiscardThread is not None and gameManager.waitDiscardThread.is_alive():
 					gameManager.waitDiscardEvent.set()
 				gameManager.clientDiscarded(wind, card)
 			case ServerActionType.OTHER_PLAYER_GOT_CARD:
-				wind = gameManager.gameHandler.getWindByName(receivedData[0].decode())
+				wind = GameHandler.getWindByName(receivedData[0].decode())
 				gameManager.otherPlayerGotCard(wind)
 			case ServerActionType.WAIT_CARD_ACTION:
 				gameManager.waitCardAction()
+			case ServerActionType.CLIENT_PERFORMED_CARD_ACTION:
+				wind = GameHandler.getWindByName(receivedData[0].decode())
+				cardActionType = GameHandler.getCardActionTypeByName(receivedData[1].decode())
+				receivedData = receivedData[2:]
+				cardTypes: list[CardType] = []
+				for cardNameBytes in receivedData:
+					cardTypes.append(GameHandler.getCardTypeByName(cardNameBytes.decode()))
+				gameManager.clientPerformedCardAction(wind, cardActionType, cardTypes)
+
 
 	def receiveEncryptedMessages(self) -> list[bytes]:
 		iv = self.receiveData(256)
