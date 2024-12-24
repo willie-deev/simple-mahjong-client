@@ -18,7 +18,6 @@ class GameManager:
 		self.orderNumberWindMap = None
 		self.waitDiscardEvent = threading.Event()
 		self.waitDiscardThread: Thread | None = None
-		self.waitCardActionThread: Thread | None = None
 		self.discardedCardType = None
 		self.startAddCardCount = 0
 		self.canAction: bool | None = None
@@ -92,7 +91,7 @@ class GameManager:
 	def waitDiscardThreadFunction(self):
 		self.waitDiscardEvent.wait()
 		self.waitDiscardEvent.clear()
-		self.gameHandler.main.guiHandler.gameWindowHandler.waitingForDiscard = False
+		self.gameHandler.main.guiHandler.gameWindowHandler.selfCardUiManager.waitingForDiscard = False
 		if self.discardedCardType is not None:
 			self.sendMessageUtils.sendClientActionType(ClientActionType.DISCARD, [self.discardedCardType.name.encode()])
 			self.discardedCardType = None
@@ -116,18 +115,15 @@ class GameManager:
 		self.sendMessageUtils.sendClientActionType(ClientActionType.RECEIVED_DISCARD_ACTION, [self.canAction.to_bytes()])
 
 	def waitCardAction(self):
+		debugOutput("self.canAction: " + str(self.canAction))
 		if self.canAction is True:
-			self.waitCardActionThread = threading.Thread(target=self.waitCardActionThreadFunction)
-			self.waitCardActionThread.run()
+			self.gameWindowController.triggerCanDoActions(self.cardActionCardsDict)
 		else:
 			self.cancelCardAction()
 
-	def waitCardActionThreadFunction(self):
-		cardActionCardsDict = self.cardActionCardsDict.copy()
-		self.gameWindowController.triggerCanDoActions(cardActionCardsDict)
-
 	def cancelCardAction(self):
 		self.canAction = False
+		debugOutput("canceled Card Action")
 		self.sendMessageUtils.sendClientActionType(ClientActionType.PERFORM_CARD_ACTION, [])
 
 	def performChowCardAction(self, cardTypes: list[CardType]):
@@ -148,3 +144,8 @@ class GameManager:
 				self.gotCards.remove(cardTypes[2])
 			self.sortAllCards()
 		self.gameWindowController.triggerPerformedCardAction(performedWind, cardTypes)
+
+	def notPerformedCardAction(self):
+		self.canAction = False
+		self.cardActionCardsDict = {}
+		self.gameWindowController.triggerNotPerformedCardAction()

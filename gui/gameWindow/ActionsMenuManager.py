@@ -73,26 +73,29 @@ class ActionsMenuManager:
 			self.canChowCardTypes = []
 			for cardTypes in self.cardActionCardsDict[CardActionType.CHOW]:
 				self.canChowCardTypes += cardTypes
-			styleSheet = self.gameWindowHandler.getCardButtonVariables()[0]
-			for selfCardButton, cardType in self.gameWindowHandler.addedCards.items():
+			styleSheet = self.gameWindowHandler.selfCardUiManager.getCardButtonVariables()[0]
+			for selfCardButton, cardType in self.gameWindowHandler.selfCardUiManager.addedCards.items():
 				if cardType in self.canChowCardTypes:
 					selfCardButton.setStyleSheet(styleSheet + "QPushButton:hover { background-color: lightgray; }")
 				else:
 					selfCardButton.setStyleSheet(styleSheet.replace("background-color: white;", "background-color: rgb(35, 35, 35);"))
 		else:
 			self.cancelSelectingChowCard()
-
-	def cancelCardAction(self):
-		self.cancelSelectingChowCard()
-		self.hideActionsMenu()
+	def clickedCancelCardActionButton(self):
+		self.cancelCardAction()
 		gameManager = self.gameWindowHandler.guiHandler.main.gameHandler.gameManager
 		gameManager.cancelCardAction()
+
+	def cancelCardAction(self):
+		self.canChowCardTypes = []
+		self.cancelSelectingChowCard()
+		self.hideActionsMenu()
 
 	def selectedChowCard(self, cardType: CardType, clickedButton: QPushButton):
 		if cardType in self.canChowCardTypes:
 			self.selectedChowCardTypes.append(cardType)
 			if len(self.selectedChowCardTypes) <= 1:
-				styleSheet = self.gameWindowHandler.getCardButtonVariables()[0]
+				styleSheet = self.gameWindowHandler.selfCardUiManager.getCardButtonVariables()[0]
 				clickedButton.setStyleSheet(styleSheet.replace("background-color: white;", "background-color: lightgray;"))
 			elif len(self.selectedChowCardTypes) == 2:
 				self.selectedChowCardTypes.sort(key=lambda v: v.value)
@@ -116,10 +119,10 @@ class ActionsMenuManager:
 				    			}
 				    		""")
 		self.selectingChowCard = False
-		self.gameWindowHandler.updateCardButtons()
+		self.gameWindowHandler.selfCardUiManager.updateCardButtons()
 
 	def mouseLeaveButton(self):
-		self.gameWindowHandler.updateCardButtons()
+		self.gameWindowHandler.selfCardUiManager.updateCardButtons()
 
 	def hideActionsMenu(self):
 		self.overlay.hide()

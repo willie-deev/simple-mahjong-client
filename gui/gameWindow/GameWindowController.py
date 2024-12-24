@@ -14,6 +14,7 @@ class GameWindowController(QObject):
 	otherPlayerGotCard = Signal(Wind)
 	canDoActions = Signal(object)
 	performedCardAction = Signal(Wind, list)
+	notPerformedCardAction = Signal()
 
 	def __init__(self, gameWindowHandler):
 		super().__init__()
@@ -45,3 +46,6 @@ class GameWindowController(QObject):
 
 	def triggerPerformedCardAction(self, wind: Wind, performedCardAction: list[CardType]):
 		self.performedCardAction.emit(wind, performedCardAction)
+
+	def triggerNotPerformedCardAction(self):
+		self.notPerformedCardAction.emit()

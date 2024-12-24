@@ -91,13 +91,16 @@ class ReceiveMessageThread(threading.Thread):
 			case ServerActionType.WAIT_CARD_ACTION:
 				gameManager.waitCardAction()
 			case ServerActionType.CLIENT_PERFORMED_CARD_ACTION:
-				wind = GameHandler.getWindByName(receivedData[0].decode())
-				cardActionType = GameHandler.getCardActionTypeByName(receivedData[1].decode())
-				receivedData = receivedData[2:]
-				cardTypes: list[CardType] = []
-				for cardNameBytes in receivedData:
-					cardTypes.append(GameHandler.getCardTypeByName(cardNameBytes.decode()))
-				gameManager.clientPerformedCardAction(wind, cardActionType, cardTypes)
+				if len(receivedData) != 0:
+					wind = GameHandler.getWindByName(receivedData[0].decode())
+					cardActionType = GameHandler.getCardActionTypeByName(receivedData[1].decode())
+					receivedData = receivedData[2:]
+					cardTypes: list[CardType] = []
+					for cardNameBytes in receivedData:
+						cardTypes.append(GameHandler.getCardTypeByName(cardNameBytes.decode()))
+					gameManager.clientPerformedCardAction(wind, cardActionType, cardTypes)
+				else:
+					gameManager.notPerformedCardAction()
 
 
 	def receiveEncryptedMessages(self) -> list[bytes]:

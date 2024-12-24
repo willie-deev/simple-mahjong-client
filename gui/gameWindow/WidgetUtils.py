@@ -38,7 +38,7 @@ class WidgetManager:
 		newPushButton.setIcon(icon)
 		newPushButton.setIconSize(QSize(60, 80))
 
-		newPushButton.clicked.connect(lambda _: self.gameWindowHandler.clickedOnCardButton(cardType, newPushButton))
+		newPushButton.clicked.connect(lambda _: self.gameWindowHandler.selfCardUiManager.clickedOnCardButton(cardType, newPushButton))
 
 		return newPushButton
 

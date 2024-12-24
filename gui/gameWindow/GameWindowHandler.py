@@ -1,11 +1,12 @@
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import Qt
-from PySide6.QtWidgets import QPushButton
 
 from game.CardType import CardType
 from game.Wind import Wind
 from gui.gameWindow.ActionsMenuManager import ActionsMenuManager
+from gui.gameWindow.DiscardUiManager import DiscardUiManager
 from gui.gameWindow.GameWindowController import GameWindowController
+from gui.gameWindow.SelfCardUiManager import SelfCardUiManager
 from gui.gameWindow.WidgetUtils import WidgetManager
 from gui.gameWindow.gameWindow import *
 from utils.debugUtils import debugOutput
@@ -18,14 +19,6 @@ class GameWindowHandler(QMainWindow):
 		self.guiHandler = guiHandler
 		self.gameWindowController = GameWindowController(self)
 		self.widgetUtils = WidgetManager(self)
-		self.addedCards: dict[QPushButton, CardType] = {}
-		self.waitingForDiscard = False
-		self.selfDiscardedLabels: dict[QLabel, CardType] = {}
-		self.leftDiscardedLabels: dict[QLabel, CardType] = {}
-		self.oppositeDiscardedLabels: dict[QLabel, CardType] = {}
-		self.rightDiscardedLabels: dict[QLabel, CardType] = {}
-
-		self.lastDiscardedLabel: QLabel | None = None
 
 		self.selfActionedCardLabels: dict[QLabel, CardType] = {}
 		self.leftActionedCardLabels: dict[QLabel, CardType] = {}
@@ -41,24 +34,26 @@ class GameWindowHandler(QMainWindow):
 		self.rightGotCardLabel = None
 
 		self.actionsMenuManager = ActionsMenuManager(self)
+		self.selfCardUiManager = SelfCardUiManager(self)
+		self.discardUiManager = DiscardUiManager(self)
 
 	def resizeEvent(self, event):
 		super().resizeEvent(event)
 		self.actionsMenuManager.resizeOverlay()
-		self.updateCardButtons()
-		self.resizeDiscardedLabels()
+		self.selfCardUiManager.updateCardButtons()
+		self.discardUiManager.resizeDiscardedLabels()
 		self.resizeOtherPlayerCards()
 
 	def showEvent(self, event):
 		super().showEvent(event)
-		self.resizeDiscardedLabels()
+		self.discardUiManager.resizeDiscardedLabels()
 
 	def changeEvent(self, event):
 		super().changeEvent(event)
 		self.actionsMenuManager.resizeOverlay()
-		self.updateCardButtons()
-		self.resizeDiscardedLabels()
-		QTimer.singleShot(1, self.updateCardButtons)
+		self.selfCardUiManager.updateCardButtons()
+		self.discardUiManager.resizeDiscardedLabels()
+		QTimer.singleShot(1, self.selfCardUiManager.updateCardButtons)
 
 	def setupUi(self):
 		self.ui.setupUi(self)
@@ -67,26 +62,27 @@ class GameWindowHandler(QMainWindow):
 
 		self.ui.selfCards.update()
 		self.gameWindowController.setPlayerWind.connect(self.setPlayerWind)
-		self.gameWindowController.startAddCards.connect(self.startAddCards)
-		self.gameWindowController.setAllCards.connect(self.setAllCards)
+		self.gameWindowController.startAddCards.connect(self.selfCardUiManager.startAddCards)
+		self.gameWindowController.setAllCards.connect(self.selfCardUiManager.setAllCards)
 		# self.gameWindowController.setFlowerCount.connect(self.setFlowerCount)
-		self.gameWindowController.gotNewCard.connect(self.gotNewCard)
-		self.gameWindowController.waitDiscard.connect(self.waitDiscard)
-		self.gameWindowController.playerDiscarded.connect(self.playerDiscarded)
-		self.gameWindowController.otherPlayerGotCard.connect(self.otherPlayerGotCard)
+		self.gameWindowController.gotNewCard.connect(self.selfCardUiManager.gotNewCard)
+		self.gameWindowController.waitDiscard.connect(self.discardUiManager.waitDiscard)
+		self.gameWindowController.playerDiscarded.connect(self.discardUiManager.playerDiscarded)
+		self.gameWindowController.otherPlayerGotCard.connect(self.showOtherPlayerGotCardLabel)
 		self.gameWindowController.canDoActions.connect(self.actionsMenuManager.showActionsMenu)
 		self.gameWindowController.performedCardAction.connect(self.performedCardAction)
+		self.gameWindowController.notPerformedCardAction.connect(self.notPerformedCardAction)
 
 		self.actionsMenuManager.setupActionsMenu()
 		self.actionsMenuManager.hideActionsMenu()
 
-		self.setupDiscardArea()
-		self.setupOtherPlayerLabel()
+		self.discardUiManager.setupDiscardArea()
+		self.setupOtherPlayerCardLabels()
 
 		# self.guiHandler.mainWindow.show()
 		debugOutput("inited")
 
-	def setupOtherPlayerLabel(self):
+	def setupOtherPlayerCardLabels(self):
 		for i in range(16):
 			label = self.widgetUtils.getHideCardLabel()
 			self.ui.leftCardsLayout.addWidget(label)
@@ -121,6 +117,9 @@ class GameWindowHandler(QMainWindow):
 		layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 		self.rightGotCardLabel.hide()
 
+	def notPerformedCardAction(self):
+		self.actionsMenuManager.cancelCardAction()
+
 	def performedCardAction(self, wind: Wind, cardTypes: list[CardType]):
 		debugOutput("wind: " + str(wind) + " cardTypes: " + str(cardTypes))
 		for cardType in cardTypes:
@@ -132,14 +131,9 @@ class GameWindowHandler(QMainWindow):
 			elif self.guiHandler.main.gameHandler.windToSide(wind) == "right":
 				self.rightAddedCardLabels.pop().deleteLater()
 
-		self.leftDiscardedLabels.pop(self.lastDiscardedLabel, None)
-		self.rightDiscardedLabels.pop(self.lastDiscardedLabel, None)
-		self.oppositeDiscardedLabels.pop(self.lastDiscardedLabel, None)
-		self.selfDiscardedLabels.pop(self.lastDiscardedLabel, None)
-		self.lastDiscardedLabel.deleteLater()
-		self.resizeDiscardedLabels()
+		self.discardUiManager.removeLastDiscardedLabel()
 
-	def otherPlayerGotCard(self, wind: Wind):
+	def showOtherPlayerGotCardLabel(self, wind: Wind):
 		if self.guiHandler.main.gameHandler.windToSide(wind) == "left":
 			self.leftGotCardLabel.show()
 		elif self.guiHandler.main.gameHandler.windToSide(wind) == "opposite":
@@ -148,7 +142,7 @@ class GameWindowHandler(QMainWindow):
 			self.rightGotCardLabel.show()
 		self.resizeOtherPlayerCards()
 
-	def otherPlayerDiscarded(self, wind: Wind):
+	def hideOtherPlayerGotCardLabel(self, wind: Wind):
 		if self.guiHandler.main.gameHandler.windToSide(wind) == "left":
 			self.leftGotCardLabel.hide()
 		elif self.guiHandler.main.gameHandler.windToSide(wind) == "opposite":
@@ -186,65 +180,6 @@ class GameWindowHandler(QMainWindow):
 			layout.addWidget(actionedCardLabel)
 		labelDist[actionedCardLabel] = cardType
 
-	def setupDiscardArea(self):
-		horizontalRows = 2
-		horizontalCols = 14
-
-		verticalRows = 7
-		verticalCols = 4
-
-		self.ui.selfDiscardedLayout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding), horizontalRows, 0, 1, horizontalCols)
-		self.ui.selfDiscardedLayout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum), 0, horizontalCols, horizontalRows, 1)
-
-		self.ui.leftDiscardedLayout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding), verticalRows, 0, 1, verticalCols)
-		self.ui.leftDiscardedLayout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum), 0, 0, verticalRows, 1)
-
-		self.ui.oppositeDiscardedLayout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding), 0, horizontalRows, 1, horizontalCols)
-		self.ui.oppositeDiscardedLayout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum), horizontalCols, 0, horizontalRows, 1)
-
-		self.ui.rightDiscardedLayout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding), 0, 0, 1, verticalCols)
-		self.ui.rightDiscardedLayout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum), 0, verticalCols, verticalRows, 1)
-
-	def addDiscardedCard(self, wind: Wind, cardType: CardType):
-		pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-		if self.guiHandler.main.gameHandler.windToSide(wind) == "self":
-			layout = self.ui.selfDiscardedLayout
-			discardedLabelList = self.selfDiscardedLabels
-			cols = 14
-			row = len(discardedLabelList) // cols
-			col = len(discardedLabelList) % cols
-		elif self.guiHandler.main.gameHandler.windToSide(wind) == "left":
-			layout = self.ui.leftDiscardedLayout
-			discardedLabelList = self.leftDiscardedLabels
-			rows = 7
-			cols = 4
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 90)
-			row = len(discardedLabelList) % rows
-			col = cols - len(discardedLabelList) // rows
-		elif self.guiHandler.main.gameHandler.windToSide(wind) == "opposite":
-			layout = self.ui.oppositeDiscardedLayout
-			discardedLabelList = self.oppositeDiscardedLabels
-			rows = 2
-			cols = 14
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 180)
-			row = rows - len(discardedLabelList) // cols
-			col = cols - len(discardedLabelList) % cols
-		else:
-			layout = self.ui.rightDiscardedLayout
-			discardedLabelList = self.rightDiscardedLabels
-			rows = 7
-			cols = 4
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 270)
-			row = rows - len(discardedLabelList) % rows
-			col = len(discardedLabelList) // rows
-		label = QLabel()
-		label.setPixmap(pixmap)
-		label.setStyleSheet("background-color: white; border-radius: 5px;")
-		label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-		layout.addWidget(label, row, col)
-		discardedLabelList[label] = cardType
-		self.lastDiscardedLabel = label
-
 	def resizeOtherPlayerCards(self):
 		widgetWidth = self.rect().width() * 1 // 12
 		widgetHeight = self.rect().height() * 7 // 8
@@ -277,136 +212,6 @@ class GameWindowHandler(QMainWindow):
 		for oppositeAddedCardLabel in self.oppositeAddedCardLabels:
 			oppositeAddedCardLabel.setFixedSize(labelWidth, labelHeight)
 		self.oppositeGotCardLabel.setFixedSize(labelWidth, labelHeight)
-
-	def resizeDiscardedLabels(self):
-		widgetWidth = self.rect().width() * 25 // 42
-		widgetHeight = self.rect().height() * 40 // 147
-		labelWidth = min((widgetWidth - 78) // 14 , (widgetHeight - 18) // 2 // 3 * 2)
-		labelWidth = labelWidth - labelWidth // 5
-		labelHeight = min((widgetWidth - 78) // 14 // 2 * 3, (widgetHeight - 18) // 2)
-		labelHeight = labelHeight - labelHeight // 5
-		if labelWidth < 0 or labelHeight < 0:
-			return
-		for selfDiscardedLabel, cardType in self.selfDiscardedLabels.items():
-			selfDiscardedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 0)
-			pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
-			selfDiscardedLabel.setPixmap(pixmap)
-		for oppositeDiscardedLabel, cardType in self.oppositeDiscardedLabels.items():
-			oppositeDiscardedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 180)
-			pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
-			oppositeDiscardedLabel.setPixmap(pixmap)
-
-		for selfActionedLabel, cardType in self.selfActionedCardLabels.items():
-			selfActionedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 0)
-			pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
-			selfActionedLabel.setPixmap(pixmap)
-		for oppositeActionedLabel, cardType in self.oppositeActionedCardLabels.items():
-			oppositeActionedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 180)
-			pixmap = pixmap.scaled(labelWidth * 6 / 7, labelHeight * 6 / 7)
-			oppositeActionedLabel.setPixmap(pixmap)
-
-		widgetWidth = self.rect().width() * 5 // 21
-		widgetHeight = self.rect().height() * 25 // 48
-		labelWidth = min((widgetWidth - 30) // 4, (widgetHeight - 48) // 7 * 3 // 2)
-		labelWidth = labelWidth - labelWidth // 5
-		labelHeight = min((widgetWidth - 30) // 4 // 3 * 2, (widgetHeight - 48) // 7)
-		labelHeight = labelHeight - labelHeight // 5
-		if labelWidth < 0 or labelHeight < 0:
-			return
-		for leftDiscardedLabel, cardType in self.leftDiscardedLabels.items():
-			leftDiscardedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 90)
-			pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
-			leftDiscardedLabel.setPixmap(pixmap)
-		for rightDiscardedLabel, cardType in self.rightDiscardedLabels.items():
-			rightDiscardedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 270)
-			pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
-			rightDiscardedLabel.setPixmap(pixmap)
-
-		for leftActionedLabel, cardType in self.leftActionedCardLabels.items():
-			leftActionedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 90)
-			pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
-			leftActionedLabel.setPixmap(pixmap)
-		for rightActionedLabel, cardType in self.rightActionedCardLabels.items():
-			rightActionedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 270)
-			pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
-			rightActionedLabel.setPixmap(pixmap)
-
-	def playerDiscarded(self, wind: Wind, cardType: CardType):
-		self.addDiscardedCard(wind, cardType)
-		self.otherPlayerDiscarded(wind)
-		self.resizeDiscardedLabels()
-
-	def waitDiscard(self):
-		self.waitingForDiscard = True
-		self.updateCardButtons()
-
-	def clickedOnCardButton(self, cardType: CardType, clickedButton: QPushButton):
-		if self.actionsMenuManager.selectingChowCard is True:
-			self.actionsMenuManager.selectedChowCard(cardType, clickedButton)
-		if not self.waitingForDiscard:
-			return
-		self.guiHandler.main.gameHandler.gameManager.setDiscardType(cardType)
-		self.updateCardButtons()
-
-	def updateCardButtons(self):
-		if not self.actionsMenuManager.selectingChowCard:
-			for card in self.addedCards.keys():
-				styleSheet, height, width = self.getCardButtonVariables()
-				card.setIconSize(QSize(width, height))
-				if self.waitingForDiscard:
-					styleSheet += "QPushButton:hover { background-color: lightgray; }"
-				card.setStyleSheet(styleSheet)
-
-	def getCardButtonVariables(self):
-		height = self.ui.selfCards.height() // 4 * 3
-		width = height // 3 * 2
-		padding = width // 7
-		borderRadius = padding
-		styleSheet = "QPushButton{"
-		styleSheet += "padding-left: " + str(padding) + "px;"
-		styleSheet += "padding-right: " + str(padding) + "px;"
-		styleSheet += "background-color: white;"
-		styleSheet += "border-radius: " + str(borderRadius) + "px;"
-		styleSheet += "}"
-		return styleSheet, height, width
-
-	def setAllCards(self, cardTypes: list[CardType]):
-		for addedCard in self.addedCards.keys():
-			# self.ui.selfCards.layout().removeWidget(addedCard)
-			addedCard.deleteLater()
-		self.addedCards.clear()
-		self.startAddCards(cardTypes)
-
-	def gotNewCard(self, cardType: CardType):
-		newPushButton = self.widgetUtils.getCardButton(cardType)
-		# self.ui.selfCards.layout().addWidget(newPushButton)
-		# debugOutput(str(len(self.addedCards)))
-		self.ui.newCards.layout().addWidget(newPushButton)
-		self.addedCards[newPushButton] = cardType
-		self.updateCardButtons()
-
-	def startAddCards(self, cardTypes: list[CardType]):
-		for cardType in cardTypes:
-			newPushButton = self.widgetUtils.getCardButton(cardType)
-			self.ui.handCards.layout().addWidget(newPushButton)
-			self.addedCards[newPushButton] = cardType
-		self.updateCardButtons()
 
 	def setPlayerWind(self, wind: Wind):
 		playerWindPixmaps = self.widgetUtils.getPlayerWindPixmaps(wind)
