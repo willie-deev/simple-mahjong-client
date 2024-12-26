@@ -12,9 +12,11 @@ class GameWindowController(QObject):
 	waitDiscard = Signal()
 	playerDiscarded = Signal(Wind, CardType)
 	otherPlayerGotCard = Signal(Wind)
-	canDoActions = Signal(object)
+	performCardAction = Signal(object)
 	performedCardAction = Signal(Wind, list)
 	notPerformedCardAction = Signal()
+	performedConcealedKong = Signal(Wind)
+	playerReady = Signal(Wind)
 
 	def __init__(self, gameWindowHandler):
 		super().__init__()
@@ -41,11 +43,17 @@ class GameWindowController(QObject):
 	def triggerOtherPlayerGotCard(self, wind: Wind):
 		self.otherPlayerGotCard.emit(wind)
 
-	def triggerCanDoActions(self, canDoActions: dict):
-		self.canDoActions.emit(canDoActions)
+	def triggerPerformCardAction(self, canDoActions: dict):
+		self.performCardAction.emit(canDoActions)
 
 	def triggerPerformedCardAction(self, wind: Wind, performedCardAction: list[CardType]):
 		self.performedCardAction.emit(wind, performedCardAction)
 
 	def triggerNotPerformedCardAction(self):
 		self.notPerformedCardAction.emit()
+
+	def triggerPerformedConcealedKong(self, wind: Wind):
+		self.performedConcealedKong.emit(wind)
+
+	def triggerPlayerReady(self, wind: Wind):
+		self.playerReady.emit(wind)

@@ -16,9 +16,19 @@ class SelfCardUiManager:
 	def clickedOnCardButton(self, cardType: CardType, clickedButton: QPushButton):
 		if self.gameWindowHandler.actionsMenuManager.selectingChowCard is True:
 			self.gameWindowHandler.actionsMenuManager.selectedChowCard(cardType, clickedButton)
+			self.updateCardButtons()
+			return
+		if self.gameWindowHandler.actionsMenuManager.selectingKongCard is True:
+			self.gameWindowHandler.actionsMenuManager.selectedConcealedKongCard(cardType)
+			self.updateCardButtons()
+			return
+		if self.gameWindowHandler.actionsMenuManager.selectingDiscardToReadyCard is True:
+			self.gameWindowHandler.actionsMenuManager.selectedReadyAfterDiscardCard(cardType)
+			self.updateCardButtons()
+			return
 		if not self.waitingForDiscard:
 			return
-		self.gameWindowHandler.guiHandler.main.gameHandler.gameManager.setDiscardType(cardType)
+		self.gameWindowHandler.guiHandler.main.gameHandler.gameManager.discard(cardType)
 		self.updateCardButtons()
 
 	def startAddCards(self, cardTypes: list[CardType]):
@@ -53,7 +63,10 @@ class SelfCardUiManager:
 		styleSheet = "QPushButton{"
 		styleSheet += "padding-left: " + str(padding) + "px;"
 		styleSheet += "padding-right: " + str(padding) + "px;"
-		styleSheet += "background-color: white;"
+		if self.gameWindowHandler.guiHandler.main.gameHandler.gameManager.selfReady is True:
+			styleSheet += "background-color: gray;"
+		else:
+			styleSheet += "background-color: white;"
 		styleSheet += "border-radius: " + str(borderRadius) + "px;"
 		styleSheet += "}"
 		return styleSheet, height, width

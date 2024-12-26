@@ -119,16 +119,18 @@ class DiscardUiManager:
 
 		for selfActionedLabel, cardType in self.gameWindowHandler.selfActionedCardLabels.items():
 			selfActionedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 0)
-			pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
-			selfActionedLabel.setPixmap(pixmap)
+			if cardType is not None:
+				pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
+				pixmap = self.widgetUtils.rotatePixmap(pixmap, 0)
+				pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
+				selfActionedLabel.setPixmap(pixmap)
 		for oppositeActionedLabel, cardType in self.gameWindowHandler.oppositeActionedCardLabels.items():
 			oppositeActionedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 180)
-			pixmap = pixmap.scaled(labelWidth * 6 / 7, labelHeight * 6 / 7)
-			oppositeActionedLabel.setPixmap(pixmap)
+			if cardType is not None:
+				pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
+				pixmap = self.widgetUtils.rotatePixmap(pixmap, 180)
+				pixmap = pixmap.scaled(labelWidth * 6 / 7, labelHeight * 6 / 7)
+				oppositeActionedLabel.setPixmap(pixmap)
 
 		widgetWidth = self.gameWindowHandler.rect().width() * 5 // 21
 		widgetHeight = self.gameWindowHandler.rect().height() * 25 // 48
@@ -153,13 +155,15 @@ class DiscardUiManager:
 
 		for leftActionedLabel, cardType in self.gameWindowHandler.leftActionedCardLabels.items():
 			leftActionedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 90)
-			pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
-			leftActionedLabel.setPixmap(pixmap)
+			if cardType is not None:
+				pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
+				pixmap = self.widgetUtils.rotatePixmap(pixmap, 90)
+				pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
+				leftActionedLabel.setPixmap(pixmap)
 		for rightActionedLabel, cardType in self.gameWindowHandler.rightActionedCardLabels.items():
 			rightActionedLabel.setFixedSize(labelWidth, labelHeight)
-			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
-			pixmap = self.widgetUtils.rotatePixmap(pixmap, 270)
-			pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
-			rightActionedLabel.setPixmap(pixmap)
+			if cardType is not None:
+				pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
+				pixmap = self.widgetUtils.rotatePixmap(pixmap, 270)
+				pixmap = pixmap.scaled(labelWidth*6/7, labelHeight*6/7)
+				rightActionedLabel.setPixmap(pixmap)

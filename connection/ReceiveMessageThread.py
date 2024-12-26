@@ -1,7 +1,6 @@
 import threading
 
 from game.CardType import CardType
-from game.GameHandler import GameHandler
 from game.ServerActionType import ServerActionType
 from utils.debugUtils import debugOutput
 
@@ -82,8 +81,9 @@ class ReceiveMessageThread(threading.Thread):
 			case ServerActionType.CLIENT_DISCARDED:
 				wind = GameHandler.getWindByName(receivedData[0].decode())
 				card = GameHandler.getCardTypeByName(receivedData[1].decode())
-				if card != CardType.FLOWER and gameManager.waitDiscardThread is not None and gameManager.waitDiscardThread.is_alive():
-					gameManager.waitDiscardEvent.set()
+				# if card != CardType.FLOWER and gameManager.waitDiscardThread is not None and gameManager.waitDiscardThread.is_alive():
+				# 	gameManager.waitDiscardEvent.set()
+				gameManager.notPerformedCardAction()
 				gameManager.clientDiscarded(wind, card)
 			case ServerActionType.OTHER_PLAYER_GOT_CARD:
 				wind = GameHandler.getWindByName(receivedData[0].decode())
@@ -101,6 +101,16 @@ class ReceiveMessageThread(threading.Thread):
 					gameManager.clientPerformedCardAction(wind, cardActionType, cardTypes)
 				else:
 					gameManager.notPerformedCardAction()
+			case ServerActionType.CLIENT_CONCEALED_KONG:
+				wind = GameHandler.getWindByName(receivedData[0].decode())
+				gameManager.performedConcealedKong(wind)
+			case ServerActionType.PLAYER_READY:
+				wind = GameHandler.getWindByName(receivedData[0].decode())
+				gameManager.playerReady(wind)
+			case ServerActionType.GAME_OVER:
+				wind = GameHandler.getWindByName(receivedData[0].decode())
+				receivedData = receivedData[1:]
+				print(wind, "won, cards: ", receivedData)
 
 
 	def receiveEncryptedMessages(self) -> list[bytes]:

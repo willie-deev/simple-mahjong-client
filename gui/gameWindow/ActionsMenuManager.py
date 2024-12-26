@@ -18,14 +18,24 @@ class ActionsMenuManager:
 		self.winButton: QPushButton | None = None
 		self.readyButton: QPushButton | None = None
 		self.kongButton: QPushButton | None = None
+		self.concealedKongButton: QPushButton | None = None
 		self.pungButton: QPushButton | None = None
 		self.chowButton: QPushButton | None = None
 		self.cancelButton: QPushButton | None = None
 
-		self.cardActionCardsDict: dict[CardActionType, list] = {}
+		self.cardActionCardsDict: dict[CardActionType, list[CardType]] = {}
 		self.selectingChowCard = False
 		self.canChowCardTypes: list[CardType] | None = None
 		self.selectedChowCardTypes: list[CardType] = []
+
+		self.selectingKongCard = False
+		self.canKongCardTypes: list[CardType] | None = None
+		self.lastSelectedConcealedKongCard = None
+
+		self.isSelfAction = False
+
+		self.selectingDiscardToReadyCard = False
+		self.canReadyAfterDiscardCards: list[CardType] | None = None
 
 	def resizeOverlay(self):
 		if self.overlay is not None and not self.overlay.isHidden():
@@ -46,9 +56,11 @@ class ActionsMenuManager:
 			self.overlay.setGeometry(posX, posY, width, height)
 
 	def showActionsMenu(self, cardActionCardsDict: dict[CardActionType, list]):
+		print(cardActionCardsDict)
 		self.cardActionCardsDict = cardActionCardsDict
 		self.overlay.show()
 		self.hideButtons()
+		self.isSelfAction =  False
 		if CardActionType.CHOW in cardActionCardsDict.keys():
 			self.chowButton.show()
 		if CardActionType.PUNG in cardActionCardsDict.keys():
@@ -57,9 +69,117 @@ class ActionsMenuManager:
 			self.kongButton.show()
 		if CardActionType.READY in cardActionCardsDict.keys():
 			self.readyButton.show()
+			self.isSelfAction = True
 		if CardActionType.WIN in cardActionCardsDict.keys():
 			self.winButton.show()
+		if CardActionType.CONCEALED_KONG in cardActionCardsDict.keys():
+			self.concealedKongButton.show()
+			self.isSelfAction = True
 		self.resizeOverlay()
+
+	def clickedWinButton(self):
+		self.gameWindowHandler.guiHandler.main.gameHandler.gameManager.performWinCardAction()
+		self.stopCardAction()
+
+	def clickedReadyButton(self):
+		if self.selectingDiscardToReadyCard is False:
+			self.selectingDiscardToReadyCard = True
+			self.readyButton.setStyleSheet("""
+									QPushButton {
+						        		background-color: rgba(50, 50, 50, 200);
+						        		border-radius: 10px;
+						    		}
+						""")
+			self.canReadyAfterDiscardCards = []
+			for cardType in self.cardActionCardsDict[CardActionType.READY]:
+				self.canReadyAfterDiscardCards.append(cardType)
+			styleSheet = self.gameWindowHandler.selfCardUiManager.getCardButtonVariables()[0]
+			for selfCardButton, cardType in self.gameWindowHandler.selfCardUiManager.addedCards.items():
+				if cardType in self.canReadyAfterDiscardCards:
+					selfCardButton.setStyleSheet(styleSheet + "QPushButton:hover { background-color: lightgray; }")
+				else:
+					selfCardButton.setStyleSheet(
+						styleSheet.replace("background-color: white;", "background-color: rgb(35, 35, 35);"))
+		else:
+			self.cancelSelectingReadyAfterDiscardCard()
+
+	def cancelSelectingReadyAfterDiscardCard(self):
+		self.canReadyAfterDiscardCards = []
+		self.readyButton.setStyleSheet("""
+			QPushButton {
+				background-color: rgba(0, 0, 0, 100);
+				border-radius: 10px;
+			}
+			QPushButton:hover {
+				background-color: rgba(0, 0, 0, 200);
+			}
+		""")
+		self.selectingDiscardToReadyCard = False
+		self.gameWindowHandler.selfCardUiManager.updateCardButtons()
+
+	def selectedReadyAfterDiscardCard(self, cardType: CardType):
+		if cardType not in self.canReadyAfterDiscardCards:
+			self.clickedReadyButton()
+			return
+		debugOutput("selectedReadyAfterDiscardCard: " + str(cardType))
+		gameManager = self.gameWindowHandler.guiHandler.main.gameHandler.gameManager
+		gameManager.performReadyCardAction(cardType)
+		self.stopCardAction()
+
+	def clickedConcealedKongButton(self):
+		if self.selectingKongCard is False:
+			self.selectingKongCard = True
+			self.concealedKongButton.setStyleSheet("""
+						QPushButton {
+			        		background-color: rgba(50, 50, 50, 200);
+			        		border-radius: 10px;
+			    		}
+			""")
+			self.canKongCardTypes = []
+			for cardType in self.cardActionCardsDict[CardActionType.CONCEALED_KONG]:
+				self.canKongCardTypes.append(cardType)
+			styleSheet = self.gameWindowHandler.selfCardUiManager.getCardButtonVariables()[0]
+			for selfCardButton, cardType in self.gameWindowHandler.selfCardUiManager.addedCards.items():
+				if cardType in self.canKongCardTypes:
+					selfCardButton.setStyleSheet(styleSheet + "QPushButton:hover { background-color: lightgray; }")
+				else:
+					selfCardButton.setStyleSheet(styleSheet.replace("background-color: white;", "background-color: rgb(35, 35, 35);"))
+		else:
+			self.cancelSelectingKongCard()
+
+	def selectedConcealedKongCard(self, cardType: CardType):
+		if cardType not in self.canKongCardTypes:
+			self.clickedConcealedKongButton()
+			return
+		debugOutput("selectedConcealedKongCard: " + str(cardType))
+		self.lastSelectedConcealedKongCard = cardType
+		gameManager = self.gameWindowHandler.guiHandler.main.gameHandler.gameManager
+		gameManager.performConcealedKongCardAction(cardType)
+		self.stopCardAction()
+
+	def cancelSelectingKongCard(self):
+		self.canKongCardTypes = []
+		self.concealedKongButton.setStyleSheet("""
+			QPushButton {
+				background-color: rgba(0, 0, 0, 100);
+				border-radius: 10px;
+			}
+			QPushButton:hover {
+				background-color: rgba(0, 0, 0, 200);
+			}
+		""")
+		self.selectingKongCard = False
+		self.gameWindowHandler.selfCardUiManager.updateCardButtons()
+
+	def clickedPungButton(self):
+		gameManager = self.gameWindowHandler.guiHandler.main.gameHandler.gameManager
+		gameManager.performPungCardAction(self.cardActionCardsDict[CardActionType.PUNG][0])
+		self.stopCardAction()
+
+	def clickedKongButton(self):
+		gameManager = self.gameWindowHandler.guiHandler.main.gameHandler.gameManager
+		gameManager.performKongCardAction(self.cardActionCardsDict[CardActionType.KONG][0])
+		self.stopCardAction()
 
 	def clickedChowButton(self):
 		if self.selectingChowCard is False:
@@ -81,14 +201,21 @@ class ActionsMenuManager:
 					selfCardButton.setStyleSheet(styleSheet.replace("background-color: white;", "background-color: rgb(35, 35, 35);"))
 		else:
 			self.cancelSelectingChowCard()
-	def clickedCancelCardActionButton(self):
-		self.cancelCardAction()
-		gameManager = self.gameWindowHandler.guiHandler.main.gameHandler.gameManager
-		gameManager.cancelCardAction()
 
-	def cancelCardAction(self):
+	def clickedCancelCardActionButton(self):
+		self.stopCardAction()
+		if self.isSelfAction is False:
+			gameManager = self.gameWindowHandler.guiHandler.main.gameHandler.gameManager
+			gameManager.cancelCardAction()
+		else:
+			self.gameWindowHandler.gameWindowController.triggerWaitDiscard()
+
+	def stopCardAction(self):
 		self.canChowCardTypes = []
 		self.cancelSelectingChowCard()
+		self.cancelSelectingKongCard()
+		self.cancelSelectingChowCard()
+		self.cancelSelectingReadyAfterDiscardCard()
 		self.hideActionsMenu()
 
 	def selectedChowCard(self, cardType: CardType, clickedButton: QPushButton):
@@ -103,21 +230,21 @@ class ActionsMenuManager:
 					debugOutput("self.selectedChowCardTypes: " + str(self.selectedChowCardTypes))
 					gameManager = self.gameWindowHandler.guiHandler.main.gameHandler.gameManager
 					gameManager.performChowCardAction(self.selectedChowCardTypes)
-					self.cancelCardAction()
+					self.stopCardAction()
 				else:
 					self.cancelSelectingChowCard()
 
 	def cancelSelectingChowCard(self):
 		self.selectedChowCardTypes = []
 		self.chowButton.setStyleSheet("""
-								QPushButton {
-				        			background-color: rgba(0, 0, 0, 100);
-				        			border-radius: 10px;
-				    			}
-				    			QPushButton:hover {
-				       				background-color: rgba(0, 0, 0, 200);
-				    			}
-				    		""")
+			QPushButton {
+				background-color: rgba(0, 0, 0, 100);
+				border-radius: 10px;
+			}
+			QPushButton:hover {
+				background-color: rgba(0, 0, 0, 200);
+			}
+		""")
 		self.selectingChowCard = False
 		self.gameWindowHandler.selfCardUiManager.updateCardButtons()
 
@@ -133,6 +260,7 @@ class ActionsMenuManager:
 		self.kongButton.hide()
 		self.pungButton.hide()
 		self.chowButton.hide()
+		self.concealedKongButton.hide()
 
 	def setupActionsMenu(self):
 		self.overlay = QWidget(self.gameWindowHandler)
@@ -147,6 +275,7 @@ class ActionsMenuManager:
 		self.chowButton = self.widgetUtils.getActionButton("chow", "Chow")
 		self.pungButton = self.widgetUtils.getActionButton("pung", "Pung")
 		self.kongButton = self.widgetUtils.getActionButton("kong", "Kong")
+		self.concealedKongButton = self.widgetUtils.getActionButton("concealedKongButton", "Kong")
 		self.readyButton = self.widgetUtils.getActionButton("ready", "Ready")
 		self.winButton = self.widgetUtils.getActionButton("win", "Win")
 		self.cancelButton = self.widgetUtils.getActionButton("cancel", "Cancel")
@@ -164,9 +293,15 @@ class ActionsMenuManager:
 		layout2.addWidget(self.chowButton)
 		layout2.addWidget(self.pungButton)
 		layout2.addWidget(self.kongButton)
+		layout2.addWidget(self.concealedKongButton)
 		layout2.addWidget(self.readyButton)
 		layout2.addWidget(self.winButton)
 		layout2.addWidget(self.cancelButton)
 
 		self.chowButton.clicked.connect(self.clickedChowButton)
-		self.cancelButton.clicked.connect(self.cancelCardAction)
+		self.pungButton.clicked.connect(self.clickedPungButton)
+		self.kongButton.clicked.connect(self.clickedKongButton)
+		self.cancelButton.clicked.connect(self.clickedCancelCardActionButton)
+		self.concealedKongButton.clicked.connect(self.clickedConcealedKongButton)
+		self.readyButton.clicked.connect(self.clickedReadyButton)
+		self.winButton.clicked.connect(self.clickedWinButton)

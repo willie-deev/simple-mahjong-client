@@ -37,6 +37,10 @@ class GameWindowHandler(QMainWindow):
 		self.selfCardUiManager = SelfCardUiManager(self)
 		self.discardUiManager = DiscardUiManager(self)
 
+		self.leftReady = False
+		self.oppositeReady = False
+		self.rightReady = False
+
 	def resizeEvent(self, event):
 		super().resizeEvent(event)
 		self.actionsMenuManager.resizeOverlay()
@@ -69,9 +73,11 @@ class GameWindowHandler(QMainWindow):
 		self.gameWindowController.waitDiscard.connect(self.discardUiManager.waitDiscard)
 		self.gameWindowController.playerDiscarded.connect(self.discardUiManager.playerDiscarded)
 		self.gameWindowController.otherPlayerGotCard.connect(self.showOtherPlayerGotCardLabel)
-		self.gameWindowController.canDoActions.connect(self.actionsMenuManager.showActionsMenu)
+		self.gameWindowController.performCardAction.connect(self.actionsMenuManager.showActionsMenu)
 		self.gameWindowController.performedCardAction.connect(self.performedCardAction)
 		self.gameWindowController.notPerformedCardAction.connect(self.notPerformedCardAction)
+		self.gameWindowController.performedConcealedKong.connect(self.performedConcealedKong)
+		self.gameWindowController.playerReady.connect(self.playerReady)
 
 		self.actionsMenuManager.setupActionsMenu()
 		self.actionsMenuManager.hideActionsMenu()
@@ -81,6 +87,23 @@ class GameWindowHandler(QMainWindow):
 
 		# self.guiHandler.mainWindow.show()
 		debugOutput("inited")
+
+	def playerReady(self, wind: Wind):
+		print("test")
+		if self.guiHandler.main.gameHandler.windToSide(wind) == "left":
+			for leftAddedCardLabel in self.leftAddedCardLabels:
+				leftAddedCardLabel.setStyleSheet("background-color: darkred; border-radius: 5px;")
+			self.leftReady = True
+		elif self.guiHandler.main.gameHandler.windToSide(wind) == "opposite":
+			for oppositeAddedCardLabel in self.oppositeAddedCardLabels:
+				oppositeAddedCardLabel.setStyleSheet("background-color: darkred; border-radius: 5px;")
+			self.oppositeReady = True
+		elif self.guiHandler.main.gameHandler.windToSide(wind) == "right":
+			for rightAddedCardLabel in self.rightAddedCardLabels:
+				rightAddedCardLabel.setStyleSheet("background-color: darkred; border-radius: 5px;")
+			self.rightReady = True
+		self.selfCardUiManager.updateCardButtons()
+		# self.resizeOtherPlayerCards()
 
 	def setupOtherPlayerCardLabels(self):
 		for i in range(16):
@@ -118,7 +141,7 @@ class GameWindowHandler(QMainWindow):
 		self.rightGotCardLabel.hide()
 
 	def notPerformedCardAction(self):
-		self.actionsMenuManager.cancelCardAction()
+		self.actionsMenuManager.stopCardAction()
 
 	def performedCardAction(self, wind: Wind, cardTypes: list[CardType]):
 		debugOutput("wind: " + str(wind) + " cardTypes: " + str(cardTypes))
@@ -132,6 +155,18 @@ class GameWindowHandler(QMainWindow):
 				self.rightAddedCardLabels.pop().deleteLater()
 
 		self.discardUiManager.removeLastDiscardedLabel()
+
+	def performedConcealedKong(self, wind: Wind):
+		debugOutput("wind Concealed Kong: " + str(wind))
+		for i in range(4):
+			self.addActionedCard(wind, None)
+			if self.guiHandler.main.gameHandler.windToSide(wind) == "left":
+				self.leftAddedCardLabels.pop().deleteLater()
+			elif self.guiHandler.main.gameHandler.windToSide(wind) == "opposite":
+				self.oppositeAddedCardLabels.pop().deleteLater()
+			elif self.guiHandler.main.gameHandler.windToSide(wind) == "right":
+				self.rightAddedCardLabels.pop().deleteLater()
+		self.discardUiManager.resizeDiscardedLabels()
 
 	def showOtherPlayerGotCardLabel(self, wind: Wind):
 		if self.guiHandler.main.gameHandler.windToSide(wind) == "left":
@@ -153,10 +188,11 @@ class GameWindowHandler(QMainWindow):
 			return
 		self.resizeOtherPlayerCards()
 
-	def addActionedCard(self, wind: Wind, cardType: CardType):
-		pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
+	def addActionedCard(self, wind: Wind, cardType: CardType | None):
 		actionedCardLabel = QLabel()
-		actionedCardLabel.setPixmap(pixmap)
+		if cardType is not None:
+			pixmap = QPixmap(self.widgetUtils.getPathByCardType(cardType))
+			actionedCardLabel.setPixmap(pixmap)
 		actionedCardLabel.setStyleSheet("background-color: white; border-radius: 5px;")
 		actionedCardLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 		reverseOrder = False

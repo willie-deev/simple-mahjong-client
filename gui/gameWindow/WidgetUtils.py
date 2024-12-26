@@ -59,6 +59,8 @@ class WidgetManager:
 		return newLabel
 
 	def getPathByCardType(self, cardType: CardType):
+		if cardType is None:
+			return None
 		if "CHARACTER" in cardType.name:
 			number = cardType.name.split("_")[1]
 			path = f"assets/character/{number}.png"
