@@ -1,3 +1,6 @@
+import os
+import sys
+
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QPixmap, QIcon, QFont, QTransform, QPainter
 from PySide6.QtWidgets import QPushButton, QSizePolicy, QLabel, QWidget
@@ -78,14 +81,14 @@ class WidgetManager:
 			path = f"assets/dragon/{dragon}.png"
 		else:
 			path = f"assets/flower/flower.png"
-		return path
+		return self.getResourcePath(path)
 
 	def getPlayerWindPixmaps(self, wind: Wind):
 		windPixmaps = [
-			QPixmap("assets/wind/east.png"),
-			QPixmap("assets/wind/south.png"),
-			QPixmap("assets/wind/west.png"),
-			QPixmap("assets/wind/north.png")
+			QPixmap(self.getResourcePath("assets/wind/east.png")),
+			QPixmap(self.getResourcePath("assets/wind/south.png")),
+			QPixmap(self.getResourcePath("assets/wind/west.png")),
+			QPixmap(self.getResourcePath("assets/wind/north.png"))
 		]
 		playerWindPixmaps = []
 		match wind:
@@ -160,3 +163,12 @@ class WidgetManager:
 		    	""")
 		return button
 
+	def getResourcePath(self, relative_path):
+		""" Get the absolute path to the resource, whether running as a script or as an executable. """
+		if hasattr(sys, '_MEIPASS'):
+			# Running as a PyInstaller executable
+			base_path = sys._MEIPASS
+		else:
+			# Running as a normal script
+			base_path = os.path.abspath(".")
+		return os.path.join(base_path, relative_path)

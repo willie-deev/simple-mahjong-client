@@ -61,8 +61,8 @@ class GameWindowHandler(QMainWindow):
 
 	def setupUi(self):
 		self.ui.setupUi(self)
-		icon = QIcon("/home/willie/PycharmProjects/simple-mahjong-client/assets/character/1.png")
-		debugOutput(icon.isNull())
+		# icon = QIcon("/home/willie/PycharmProjects/simple-mahjong-client/assets/character/1.png")
+		# debugOutput(icon.isNull())
 
 		self.ui.selfCards.update()
 		self.gameWindowController.setPlayerWind.connect(self.setPlayerWind)
